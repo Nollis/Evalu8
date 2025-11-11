@@ -144,7 +144,7 @@
 - All Core Data entities have been renamed in the model file
 - CloudKit container ID remains: `iCloud.com.nollis.evalu8`
 - Bundle identifier: `com.nollis.evalu8`
-- iOS deployment target: 16.6+
+- iOS deployment target: 17.0+ (for enhanced AI/ML capabilities)
 
 ## Files to Reference
 

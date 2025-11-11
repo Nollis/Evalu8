@@ -227,7 +227,7 @@ Testing infrastructure.
 - **Database Scope:** Private
 
 ### iOS Configuration
-- **Deployment Target:** iOS 16.6+
+- **Deployment Target:** iOS 17.0+ (for enhanced AI/ML capabilities)
 - **Interface:** SwiftUI
 - **Language:** Swift
 

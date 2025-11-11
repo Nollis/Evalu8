@@ -66,7 +66,7 @@ Delete the default files Xcode created:
 ### 6. Configure Info.plist
 
 1. Select `Info.plist`
-2. Ensure minimum iOS version is set to 16.6
+2. Ensure minimum iOS version is set to 17.0
 3. Add URL schemes if needed for deep linking:
    ```xml
    <key>CFBundleURLTypes</key>
@@ -92,7 +92,7 @@ Delete the default files Xcode created:
 1. Select the **Evalu8** target
 2. Go to **Build Settings**
 3. Search for **iOS Deployment Target**
-4. Set to **16.6**
+4. Set to **17.0**
 
 ### 8. Fix Import Issues
 

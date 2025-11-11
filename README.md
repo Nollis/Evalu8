@@ -22,7 +22,7 @@ See [EVALU8_ARCHITECTURE.md](EVALU8_ARCHITECTURE.md) for detailed architecture d
 ### Prerequisites
 
 - Xcode 15.0 or later
-- iOS 16.6+ deployment target
+- iOS 17.0+ deployment target (for enhanced AI/ML capabilities)
 - Apple Developer account (for CloudKit)
 
 ### Initial Setup
@@ -48,7 +48,7 @@ See [EVALU8_ARCHITECTURE.md](EVALU8_ARCHITECTURE.md) for detailed architecture d
    - Copy `Resources/Assets.xcassets` to the project
 
 4. **Configure Info.plist**:
-   - Set minimum iOS version to 16.6
+   - Set minimum iOS version to 17.0
    - Configure URL schemes if needed for deep linking
 
 5. **Build and Run**:

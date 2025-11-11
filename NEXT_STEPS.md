@@ -95,7 +95,7 @@ Before running the app:
 - [ ] Entitlements file configured
 - [ ] Bundle identifier: `com.nollis.evalu8`
 - [ ] CloudKit container: `iCloud.com.nollis.evalu8`
-- [ ] iOS deployment target: 16.6+
+- [ ] iOS deployment target: 17.0+ (for enhanced AI/ML capabilities)
 - [ ] All files added to Xcode project
 - [ ] Build succeeds without errors
 
