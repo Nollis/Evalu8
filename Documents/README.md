@@ -2,9 +2,10 @@
 
 This folder contains all project documentation files.
 
+**Note**: The main `README.md` is kept at the project root for GitHub visibility.
+
 ## Documentation Files
 
-- `README.md` - Project overview and setup instructions
 - `PROJECT_SETUP.md` - Step-by-step Xcode project creation guide
 - `MIGRATION_SUMMARY.md` - Migration details from Factor project
 - `IMPLEMENTATION_STATUS.md` - Current implementation status and progress
