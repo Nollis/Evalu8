@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23605" systemVersion="23H417" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
+    <entity name="DecisionShare" representedClassName="DecisionShare" syncable="YES" codeGenerationType="class">
+        <attribute name="dateInvited" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="dateResponded" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="email" optional="YES" attributeType="String"/>
+        <attribute name="status" optional="YES" attributeType="String"/>
+        <attribute name="userRecordID" optional="YES" attributeType="String"/>
+        <relationship name="decision" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Decision" inverseName="shares" inverseEntity="Decision"/>
+    </entity>
+    <entity name="Criterion" representedClassName="Criterion" syncable="YES" codeGenerationType="class">
+        <attribute name="dateCreated" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="weight" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="decision" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Decision" inverseName="criteria" inverseEntity="Decision"/>
+        <relationship name="rating" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Rating" inverseName="criterion" inverseEntity="Rating"/>
+        <relationship name="userWeights" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CriterionUserWeight" inverseName="criterion" inverseEntity="CriterionUserWeight"/>
+    </entity>
+    <entity name="CriterionUserWeight" representedClassName="CriterionUserWeight" syncable="YES" codeGenerationType="class">
+        <attribute name="userID" optional="YES" attributeType="String"/>
+        <attribute name="weight" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="criterion" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Criterion" inverseName="userWeights" inverseEntity="Criterion"/>
+    </entity>
+    <entity name="Decision" representedClassName="Decision" syncable="YES" codeGenerationType="class">
+        <attribute name="dateCreated" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="desc" optional="YES" attributeType="String"/>
+        <attribute name="iconName" optional="YES" attributeType="String" defaultValueString="folder"/>
+        <attribute name="lastModified" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="ownerID" optional="YES" attributeType="String"/>
+        <attribute name="rootRecordID" optional="YES" attributeType="String"/>
+        <attribute name="scoringScale" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="shareRecordID" optional="YES" attributeType="String"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="uuid" optional="YES" attributeType="String"/>
+        <relationship name="criteria" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Criterion" inverseName="decision" inverseEntity="Criterion"/>
+        <relationship name="options" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Option" inverseName="decision" inverseEntity="Option"/>
+        <relationship name="shares" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="DecisionShare" inverseName="decision" inverseEntity="DecisionShare"/>
+    </entity>
+    <entity name="Option" representedClassName="Option" syncable="YES" codeGenerationType="class">
+        <attribute name="dateCreated" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <relationship name="decision" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Decision" inverseName="options" inverseEntity="Decision"/>
+        <relationship name="rating" optional="YES" toMany="YES" minCount="1" deletionRule="Nullify" destinationEntity="Rating" inverseName="option" inverseEntity="Rating"/>
+    </entity>
+    <entity name="Rating" representedClassName="Rating" syncable="YES" codeGenerationType="class">
+        <attribute name="dateCreated" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="ratingValue" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="userDisplayName" optional="YES" attributeType="String"/>
+        <attribute name="userRecordID" optional="YES" attributeType="String"/>
+        <relationship name="criterion" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Criterion" inverseName="rating" inverseEntity="Criterion"/>
+        <relationship name="option" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Option" inverseName="rating" inverseEntity="Option"/>
+    </entity>
+</model>
+

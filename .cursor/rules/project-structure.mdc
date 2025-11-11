@@ -1,0 +1,337 @@
+---
+description: Evalu8 project directory structure and important files reference
+globs: **/*
+alwaysApply: true
+---
+
+# Evalu8 Project Structure
+
+This document outlines the complete directory structure of the Evalu8 iOS application and identifies important files and folders.
+
+## Project Root Structure
+
+```
+Evalu8/
+├── App/                          # Application entry point
+├── Domain/                       # Domain layer (business logic)
+├── Data/                         # Data layer (persistence & services)
+├── Presentation/                 # Presentation layer (UI)
+├── Supporting/                   # Shared utilities & constants
+├── Resources/                    # Assets and resources
+├── Tests/                        # Unit tests
+├── UITests/                      # UI tests
+└── Documentation files           # README, setup guides, etc.
+```
+
+## Layer-by-Layer Breakdown
+
+### App Layer (`App/`)
+Application entry point and app lifecycle management.
+
+**Files:**
+- `Evalu8App.swift` - Main app entry point, SwiftUI App struct
+- `AppDelegate.swift` - App delegate for lifecycle events
+
+**Purpose:** Initializes the app, sets up environment, provides root view
+
+---
+
+### Domain Layer (`Domain/`)
+Core business logic, models, and domain services. This layer has no dependencies on other layers.
+
+**Structure:**
+```
+Domain/
+├── Errors/                       # Domain error types
+│   ├── AppError.swift           # General application errors
+│   └── ShareError.swift         # CloudKit sharing errors
+├── Models/                       # Domain models
+│   ├── ActivityLog.swift        # Activity log domain model
+│   └── UserRole.swift           # User role enumeration
+└── Services/                     # Domain services
+    └── ScoreCalculator.swift     # Scoring calculation logic
+```
+
+**Key Files:**
+- `Domain/Errors/AppError.swift` - Error enumeration for app-wide errors
+- `Domain/Errors/ShareError.swift` - CloudKit sharing-specific errors
+- `Domain/Models/ActivityLog.swift` - Activity tracking model
+- `Domain/Services/ScoreCalculator.swift` - Weighted scoring calculations
+
+**Purpose:** Pure business logic, no UI or data persistence dependencies
+
+---
+
+### Data Layer (`Data/`)
+Data persistence, CloudKit integration, and repository implementations.
+
+**Structure:**
+```
+Data/
+├── Persistence/                  # Core Data stack
+│   ├── DataStore.swift          # Core Data container manager
+│   └── Evalu8.xcdatamodeld/     # Core Data model
+│       └── Evalu8.xcdatamodel/
+│           └── contents         # Entity definitions
+├── Repositories/                 # Repository pattern implementations
+│   ├── DecisionRepository.swift
+│   ├── OptionRepository.swift
+│   ├── CriterionRepository.swift
+│   └── RatingRepository.swift
+├── Mappers/                       # Data transformation
+│   └── CoreDataMapper.swift     # Domain ↔ Core Data mapping
+└── CloudKit/                     # CloudKit services
+    ├── CloudKitService.swift     # CloudKit account & record operations
+    ├── ShareService.swift        # CloudKit sharing operations
+    └── SyncService.swift         # CloudKit sync coordination
+```
+
+**Key Files:**
+- `Data/Persistence/DataStore.swift` - Singleton Core Data stack manager
+- `Data/Repositories/*.swift` - CRUD operations for each entity
+- `Data/CloudKit/CloudKitService.swift` - CloudKit account status, user records
+- `Data/CloudKit/ShareService.swift` - Decision sharing via CloudKit
+- `Data/Mappers/CoreDataMapper.swift` - Converts between Core Data and Domain models
+
+**Purpose:** Handles all data persistence, CloudKit sync, and data access
+
+**Core Data Entities:**
+- `Decision` - Main decision entity (renamed from DecisionCategory)
+- `Option` - Decision options (renamed from DecisionOption)
+- `Criterion` - Evaluation criteria
+- `Rating` - User ratings for options against criteria
+- `DecisionShare` - CloudKit sharing metadata (renamed from CategoryShare)
+- `CriterionUserWeight` - Per-user criterion weights
+
+---
+
+### Presentation Layer (`Presentation/`)
+SwiftUI views, view models, and UI components.
+
+**Structure:**
+```
+Presentation/
+├── Views/                         # SwiftUI views
+│   ├── Decisions/                # Decisions feature views ✅ Complete
+│   │   ├── DecisionListView.swift
+│   │   ├── DecisionDetailView.swift
+│   │   ├── AddDecisionView.swift
+│   │   ├── EditDecisionView.swift
+│   │   ├── AddOptionView.swift
+│   │   ├── AddCriterionView.swift
+│   │   └── ContentView.swift    # Typealias to DecisionListView
+│   ├── Options/                  # Options feature views (TODO)
+│   ├── Criteria/                 # Criteria feature views (TODO)
+│   ├── Charts/                   # Analytics views (TODO)
+│   └── Sharing/                  # Sharing views (TODO)
+├── ViewModels/                    # View models (MVVM)
+│   ├── DecisionListViewModel.swift
+│   └── DecisionDetailViewModel.swift
+├── Components/                    # Reusable UI components (TODO)
+└── Navigation/                    # Navigation configuration (TODO)
+```
+
+**Key Files:**
+- `Presentation/Views/Decisions/DecisionListView.swift` - Main decisions list
+- `Presentation/Views/Decisions/DecisionDetailView.swift` - Decision detail with options/criteria
+- `Presentation/ViewModels/DecisionListViewModel.swift` - List state management
+- `Presentation/ViewModels/DecisionDetailViewModel.swift` - Detail state management
+
+**Purpose:** UI layer, user interactions, view state management
+
+---
+
+### Supporting Layer (`Supporting/`)
+Shared utilities, constants, extensions, and environment configuration.
+
+**Structure:**
+```
+Supporting/
+├── Constants/                     # App-wide constants
+│   ├── AppConstants.swift        # CloudKit IDs, defaults, config
+│   └── OperationResult.swift    # Result type wrapper
+├── Environment/                  # Environment configuration
+│   ├── AppEnvironment.swift      # Environment detection
+│   └── DevelopmentConfig.swift   # Dev flags (bypassCloudKit, etc.)
+├── Utilities/                     # Utility classes
+│   ├── Logger.swift              # Logging utility
+│   ├── HapticManager.swift       # Haptic feedback manager
+│   └── AIService.swift            # AI criteria generation
+└── Extensions/                    # Swift extensions (TODO)
+```
+
+**Key Files:**
+- `Supporting/Constants/AppConstants.swift` - CloudKit container ID, scoring defaults
+- `Supporting/Utilities/Logger.swift` - Centralized logging
+- `Supporting/Environment/DevelopmentConfig.swift` - Development flags
+
+**Purpose:** Shared code used across all layers
+
+---
+
+### Resources (`Resources/`)
+Assets, images, colors, and app icons.
+
+**Structure:**
+```
+Resources/
+└── Assets.xcassets/               # Asset catalog
+    ├── AppIcon.appiconset/        # App icons
+    ├── AccentColor.colorset/      # Accent color
+    ├── BrandPrimary.colorset/     # Brand colors
+    ├── PrimaryGradientStart/End/  # Gradient colors
+    ├── SecondaryGradientStart/End/
+    ├── CardBackground.colorset/   # UI component colors
+    ├── CardBorder.colorset/
+    ├── PrimaryText.colorset/
+    ├── SecondaryText.colorset/
+    └── ... (other color sets)
+```
+
+**Purpose:** Visual assets, colors, icons
+
+---
+
+### Tests (`Tests/` & `UITests/`)
+Testing infrastructure.
+
+**Files:**
+- `Tests/Evalu8Tests.swift` - Unit test suite
+- `UITests/` - UI test suite (empty, ready for implementation)
+
+**Purpose:** Automated testing
+
+---
+
+## Documentation Files
+
+**Root Level Documentation:**
+- `README.md` - Project overview and setup instructions
+- `PROJECT_SETUP.md` - Step-by-step Xcode project creation guide
+- `MIGRATION_SUMMARY.md` - Migration details from Factor project
+- `IMPLEMENTATION_STATUS.md` - Current implementation status and progress
+- `NEXT_STEPS.md` - Next steps and remaining work
+
+**Cursor Rules:**
+- `.cursor/rules/cursor-rules.mdc` - How to add/edit cursor rules
+- `.cursor/rules/self-improvement.mdc` - Rule improvement guidelines
+- `.cursor/rules/project-structure.mdc` - This file
+
+---
+
+## Important Configuration Values
+
+### CloudKit Configuration
+- **Container ID:** `iCloud.com.nollis.evalu8`
+- **Bundle ID:** `com.nollis.evalu8`
+- **Database Scope:** Private
+
+### iOS Configuration
+- **Deployment Target:** iOS 16.6+
+- **Interface:** SwiftUI
+- **Language:** Swift
+
+### Core Data Model
+- **Model Name:** `Evalu8`
+- **Used with CloudKit:** Yes
+- **Codegen:** Class Definition
+
+---
+
+## Architecture Principles
+
+### Layer Dependencies (Clean Architecture)
+```
+Presentation → Domain ← Data
+     ↓           ↑
+  Supporting (shared utilities)
+```
+
+**Rules:**
+- Domain layer has NO dependencies
+- Data layer depends only on Domain
+- Presentation layer depends on Domain and Data
+- Supporting layer can be used by any layer
+
+### Naming Conventions
+- **Entities:** `Decision`, `Option`, `Criterion` (renamed from Factor's DecisionCategory, DecisionOption)
+- **Repositories:** `*Repository` suffix
+- **ViewModels:** `*ViewModel` suffix
+- **Services:** `*Service` suffix
+- **Protocols:** `*Protocol` suffix
+
+### File Organization
+- One class/struct/enum per file
+- Group related files in folders
+- Use descriptive, clear names
+- Follow Swift naming conventions
+
+---
+
+## Key Patterns Used
+
+### Repository Pattern
+- `DecisionRepository`, `OptionRepository`, etc.
+- Protocol-based for testability
+- Dependency injection via initializers
+
+### MVVM Pattern
+- ViewModels manage state
+- Views observe ViewModels
+- ViewModels use Repositories for data
+
+### Service Pattern
+- `CloudKitService`, `ShareService`, `SyncService`
+- Protocol-based interfaces
+- Async/await for async operations
+
+---
+
+## Empty/Placeholder Directories
+
+These directories exist but are currently empty (ready for future implementation):
+
+- `Presentation/Components/` - Reusable UI components
+- `Presentation/Navigation/` - Navigation configuration
+- `Presentation/Views/Options/` - Options feature views
+- `Presentation/Views/Criteria/` - Criteria feature views
+- `Presentation/Views/Charts/` - Analytics/charts views
+- `Presentation/Views/Sharing/` - Sharing UI views
+- `Supporting/Extensions/` - Swift extensions
+- `UITests/` - UI test suite
+
+---
+
+## Migration Notes
+
+This project was migrated from Factor with the following key changes:
+- `DecisionCategory` → `Decision`
+- `DecisionOption` → `Option`
+- `CategoryShare` → `DecisionShare`
+- `PersistenceController` → `DataStore`
+- `categoryID` → `decisionID` (in ActivityLog)
+
+---
+
+## Quick Reference
+
+**To add a new feature:**
+1. Create domain model in `Domain/Models/`
+2. Add Core Data entity in `Data/Persistence/Evalu8.xcdatamodeld/`
+3. Create repository in `Data/Repositories/`
+4. Create ViewModel in `Presentation/ViewModels/`
+5. Create Views in `Presentation/Views/[FeatureName]/`
+
+**To add a new utility:**
+- Place in `Supporting/Utilities/` or appropriate subdirectory
+
+**To add tests:**
+- Unit tests: `Tests/`
+- UI tests: `UITests/`
+
+**To add assets:**
+- Add to `Resources/Assets.xcassets/`
+
+---
+
+*Last Updated: After initial migration and Data/Presentation layer implementation*

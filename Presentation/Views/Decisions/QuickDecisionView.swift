@@ -1,0 +1,212 @@
+import SwiftUI
+import Speech
+
+struct QuickDecisionView: View {
+    @ObservedObject var viewModel: DecisionListViewModel
+    @Environment(\.dismiss) private var dismiss
+    
+    @StateObject private var speechRecognizer = SpeechRecognizer()
+    @State private var queryText = ""
+    @State private var isGenerating = false
+    @State private var generatedSetup: QuickDecisionSetup?
+    @State private var showingPreview = false
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                // Header
+                VStack(spacing: 8) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 50))
+                        .foregroundColor(.blue)
+                    
+                    Text("Quick Decision")
+                        .font(.title)
+                        .fontWeight(.bold)
+                    
+                    Text("Describe what you're deciding on, and we'll set it up for you")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+                .padding(.top)
+                
+                // Input Section
+                VStack(spacing: 16) {
+                    // Text Input
+                    TextField("e.g., I'm planning on buying a putter. Can you give me some choices?", text: $queryText, axis: .vertical)
+                        .textFieldStyle(.roundedBorder)
+                        .lineLimit(3...6)
+                        .disabled(isGenerating || speechRecognizer.isListening)
+                    
+                    // Voice Input Button
+                    HStack {
+                        Button(action: toggleVoiceInput) {
+                            HStack {
+                                Image(systemName: speechRecognizer.isListening ? "mic.fill" : "mic")
+                                    .foregroundColor(.white)
+                                Text(speechRecognizer.isListening ? "Listening..." : "Use Voice")
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(speechRecognizer.isListening ? Color.red : Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                        }
+                        .disabled(isGenerating)
+                    }
+                    
+                    // Transcript display
+                    if !speechRecognizer.transcript.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("You said:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text(speechRecognizer.transcript)
+                                .font(.body)
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .cornerRadius(8)
+                        }
+                    }
+                    
+                    // Error message
+                    if let error = speechRecognizer.errorMessage {
+                        Text(error)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    }
+                }
+                .padding(.horizontal)
+                
+                // Generate Button
+                Button(action: generateDecision) {
+                    HStack {
+                        if isGenerating {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
+                            Image(systemName: "sparkles")
+                        }
+                        Text(isGenerating ? "Generating..." : "Generate Decision")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(canGenerate ? Color.blue : Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                }
+                .disabled(!canGenerate || isGenerating)
+                .padding(.horizontal)
+                
+                // Preview Section
+                if let setup = generatedSetup {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Preview")
+                            .font(.headline)
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Title: \(setup.title)")
+                                .font(.subheadline)
+                            
+                            if let desc = setup.description {
+                                Text("Description: \(desc)")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Text("Options: \(setup.options.count)")
+                                .font(.caption)
+                            
+                            Text("Criteria: \(setup.criteria.count)")
+                                .font(.caption)
+                        }
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(8)
+                        
+                        Button(action: createDecision) {
+                            Text("Create Decision")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.green)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+                
+                Spacer()
+            }
+            .navigationTitle("Quick Decision")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        speechRecognizer.stopListening()
+                        dismiss()
+                    }
+                }
+            }
+            .onChange(of: speechRecognizer.transcript) { _, newValue in
+                if !newValue.isEmpty && !speechRecognizer.isListening {
+                    queryText = newValue
+                }
+            }
+        }
+    }
+    
+    private var canGenerate: Bool {
+        !queryText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
+    private func toggleVoiceInput() {
+        if speechRecognizer.isListening {
+            speechRecognizer.stopListening()
+            // Use the transcript as the query text
+            if !speechRecognizer.transcript.isEmpty {
+                queryText = speechRecognizer.transcript
+            }
+        } else {
+            speechRecognizer.startListening()
+        }
+    }
+    
+    private func generateDecision() {
+        guard !queryText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        
+        isGenerating = true
+        generatedSetup = nil
+        
+        Task {
+            do {
+                let setup = try await AIService.shared.generateQuickDecision(from: queryText)
+                await MainActor.run {
+                    generatedSetup = setup
+                    isGenerating = false
+                    HapticManager.shared.notification(.success)
+                }
+            } catch {
+                await MainActor.run {
+                    isGenerating = false
+                    viewModel.errorMessage = "Failed to generate decision: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    private func createDecision() {
+        guard let setup = generatedSetup else { return }
+        
+        viewModel.createQuickDecision(setup: setup)
+        speechRecognizer.stopListening()
+        dismiss()
+    }
+}
+
+#Preview {
+    QuickDecisionView(viewModel: DecisionListViewModel())
+}
+
