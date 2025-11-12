@@ -38,9 +38,14 @@ struct DecisionChartsView: View {
                         }
                         .frame(height: 300)
                         .chartXAxis {
-                            AxisMarks(values: .automatic) { _ in
-                                AxisValueLabel()
-                                    .rotationEffect(.degrees(-45))
+                            AxisMarks(values: .automatic) { value in
+                                AxisValueLabel {
+                                    if let stringValue = value.as(String.self) {
+                                        Text(stringValue)
+                                            .rotationEffect(.degrees(-45))
+                                            .frame(width: 80, alignment: .leading)
+                                    }
+                                }
                             }
                         }
                     }
@@ -72,9 +77,14 @@ struct DecisionChartsView: View {
                             }
                             .frame(height: 300)
                             .chartXAxis {
-                                AxisMarks(values: .automatic) { _ in
-                                    AxisValueLabel()
-                                        .rotationEffect(.degrees(-45))
+                                AxisMarks(values: .automatic) { value in
+                                    AxisValueLabel {
+                                        if let stringValue = value.as(String.self) {
+                                            Text(stringValue)
+                                                .rotationEffect(.degrees(-45))
+                                                .frame(width: 80, alignment: .leading)
+                                        }
+                                    }
                                 }
                             }
                             .chartLegend(position: .bottom)
