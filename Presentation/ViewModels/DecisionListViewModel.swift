@@ -25,17 +25,19 @@ class DecisionListViewModel: ObservableObject {
     }
     
     func loadDecisions() {
+        Logger.shared.log("DecisionListViewModel: loadDecisions() called", level: .info)
         isLoading = true
         errorMessage = nil
         
         do {
             decisions = try decisionRepository.fetchAll()
             isLoading = false
-            Logger.shared.log("Loaded \(decisions.count) decisions", level: .info)
+            Logger.shared.log("DecisionListViewModel: Loaded \(decisions.count) decisions", level: .info)
         } catch {
             isLoading = false
             errorMessage = error.localizedDescription
-            Logger.shared.log("Error loading decisions: \(error.localizedDescription)", level: .error)
+            Logger.shared.log("DecisionListViewModel: Error loading decisions: \(error.localizedDescription)", level: .error)
+            Logger.shared.log("DecisionListViewModel: Error details: \(error)", level: .error)
         }
     }
     

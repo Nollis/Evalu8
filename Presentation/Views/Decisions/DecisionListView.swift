@@ -13,8 +13,13 @@ struct DecisionListView: View {
                 
                 Group {
                     if viewModel.isLoading {
-                        ProgressView("Loading decisions...")
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        VStack {
+                            ProgressView("Loading decisions...")
+                            Text("isLoading: true")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else if viewModel.decisions.isEmpty {
                         EmptyStateView(
                             title: "No Decisions Yet",
@@ -72,6 +77,8 @@ struct DecisionListView: View {
                 }
             }
             .onAppear {
+                Logger.shared.log("DecisionListView: onAppear called", level: .info)
+                Logger.shared.log("DecisionListView: isLoading=\(viewModel.isLoading), decisions.count=\(viewModel.decisions.count)", level: .info)
                 viewModel.loadDecisions()
             }
         }
