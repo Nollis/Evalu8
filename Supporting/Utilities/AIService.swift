@@ -66,7 +66,10 @@ class AIService {
             "deciding on (.+?)(\\.|\\?|$)",
             "looking for (.+?)(\\.|\\?|$)",
             "need (.+?)(\\.|\\?|$)",
-            "want (.+?)(\\.|\\?|$)"
+            "want (.+?)(\\.|\\?|$)",
+            "compare (.+?)(\\.|\\?|$)",
+            "comparing (.+?)(\\.|\\?|$)",
+            "to (.+?)(\\.|\\?|$)"
         ]
         
         for pattern in patterns {
@@ -90,11 +93,26 @@ class AIService {
         
         // Fallback: try to extract key words
         if decisionType.isEmpty {
-            let productKeywords = ["putter", "car", "vehicle", "house", "home", "phone", "smartphone", "laptop", "computer", "job", "career", "vacation", "trip", "restaurant", "hotel", "camera", "headphones", "watch"]
+            let productKeywords = [
+                "putter", "golf putter", "putters",
+                "car", "vehicle", "automobile",
+                "house", "home", "apartment",
+                "phone", "smartphone", "mobile",
+                "laptop", "computer", "notebook",
+                "job", "career", "position",
+                "vacation", "trip", "holiday",
+                "restaurant", "hotel", "camera",
+                "headphones", "watch", "smartwatch"
+            ]
             for keyword in productKeywords {
                 if lowercased.contains(keyword) {
                     decisionType = keyword
-                    title = "Best \(keyword.capitalized)"
+                    // Create a better title
+                    if keyword.contains("putter") {
+                        title = "Golf Putter Comparison"
+                    } else {
+                        title = "Best \(keyword.capitalized)"
+                    }
                     break
                 }
             }
@@ -113,15 +131,16 @@ class AIService {
     
     private func generateOptions(for decisionType: String, context: String) -> [String] {
         let type = decisionType.lowercased()
+        let ctx = context.lowercased()
         
         // Product-specific options
-        if type.contains("putter") {
+        if type.contains("putter") || ctx.contains("putter") || ctx.contains("golf putter") {
             return [
-                "Odyssey White Hot OG",
-                "Scotty Cameron Select",
-                "TaylorMade Spider",
-                "Ping Anser",
-                "Titleist Phantom X"
+                "Ping",
+                "TaylorMade",
+                "Cleveland",
+                "Odyssey",
+                "Scotty Cameron"
             ]
         } else if type.contains("car") || type.contains("vehicle") {
             return [
@@ -173,13 +192,40 @@ class AIService {
             ]
         }
         
-        // Generic fallback
+        // Try to extract from context if available
+        if !context.isEmpty {
+            // Look for common patterns like "between X and Y" or "X vs Y"
+            let betweenPattern = "between (.+?) and (.+?)(\\.|\\?|$)"
+            let vsPattern = "(.+?) vs (.+?)(\\.|\\?|$)"
+            
+            if let regex = try? NSRegularExpression(pattern: betweenPattern, options: .caseInsensitive),
+               let match = regex.firstMatch(in: context, options: [], range: NSRange(context.startIndex..., in: context)),
+               match.numberOfRanges > 2,
+               let range1 = Range(match.range(at: 1), in: context),
+               let range2 = Range(match.range(at: 2), in: context) {
+                return [
+                    String(context[range1]).trimmingCharacters(in: .whitespacesAndNewlines),
+                    String(context[range2]).trimmingCharacters(in: .whitespacesAndNewlines)
+                ]
+            }
+            
+            if let regex = try? NSRegularExpression(pattern: vsPattern, options: .caseInsensitive),
+               let match = regex.firstMatch(in: context, options: [], range: NSRange(context.startIndex..., in: context)),
+               match.numberOfRanges > 2,
+               let range1 = Range(match.range(at: 1), in: context),
+               let range2 = Range(match.range(at: 2), in: context) {
+                return [
+                    String(context[range1]).trimmingCharacters(in: .whitespacesAndNewlines),
+                    String(context[range2]).trimmingCharacters(in: .whitespacesAndNewlines)
+                ]
+            }
+        }
+        
+        // Generic fallback - ensure at least 2 options
         return [
             "Option A",
             "Option B",
-            "Option C",
-            "Option D",
-            "Option E"
+            "Option C"
         ]
     }
     
@@ -191,14 +237,14 @@ class AIService {
         
         var criteria: [QuickDecisionSetup.CriterionSetup] = []
         
-        // Product-specific criteria
-        if type.contains("putter") {
+        // Product-specific criteria with automatic weighting
+        if type.contains("putter") || desc.contains("putter") || desc.contains("golf putter") {
             criteria = [
-                QuickDecisionSetup.CriterionSetup(name: "Feel and Balance", weight: 5),
                 QuickDecisionSetup.CriterionSetup(name: "Price", weight: 4),
-                QuickDecisionSetup.CriterionSetup(name: "Brand Reputation", weight: 3),
-                QuickDecisionSetup.CriterionSetup(name: "Design and Aesthetics", weight: 3),
-                QuickDecisionSetup.CriterionSetup(name: "Durability", weight: 4)
+                QuickDecisionSetup.CriterionSetup(name: "Look", weight: 3),
+                QuickDecisionSetup.CriterionSetup(name: "Feel", weight: 5),
+                QuickDecisionSetup.CriterionSetup(name: "Balance", weight: 4),
+                QuickDecisionSetup.CriterionSetup(name: "Brand", weight: 3)
             ]
         } else if type.contains("car") || type.contains("vehicle") {
             criteria = [
@@ -225,7 +271,7 @@ class AIService {
                 QuickDecisionSetup.CriterionSetup(name: "Build Quality", weight: 4)
             ]
         } else {
-            // Generic criteria
+            // Generic criteria - always generate at least 3-4 relevant criteria
             criteria = [
                 QuickDecisionSetup.CriterionSetup(name: "Price", weight: 4),
                 QuickDecisionSetup.CriterionSetup(name: "Quality", weight: 5),
@@ -235,17 +281,28 @@ class AIService {
             ]
         }
         
-        // Adjust based on description keywords
-        if desc.contains("budget") || desc.contains("cheap") {
+        // Adjust weights based on description keywords for better context understanding
+        if desc.contains("budget") || desc.contains("cheap") || desc.contains("affordable") {
             if let index = criteria.firstIndex(where: { $0.name.lowercased().contains("price") }) {
                 criteria[index] = QuickDecisionSetup.CriterionSetup(name: criteria[index].name, weight: 6)
             }
         }
         
-        if desc.contains("quality") || desc.contains("premium") {
+        if desc.contains("quality") || desc.contains("premium") || desc.contains("luxury") {
             if let index = criteria.firstIndex(where: { $0.name.lowercased().contains("quality") }) {
                 criteria[index] = QuickDecisionSetup.CriterionSetup(name: criteria[index].name, weight: 6)
             }
+        }
+        
+        if desc.contains("performance") || desc.contains("speed") {
+            if let index = criteria.firstIndex(where: { $0.name.lowercased().contains("performance") || $0.name.lowercased().contains("features") }) {
+                criteria[index] = QuickDecisionSetup.CriterionSetup(name: criteria[index].name, weight: 6)
+            }
+        }
+        
+        // Ensure we have at least 2 criteria
+        if criteria.count < 2 {
+            criteria.append(QuickDecisionSetup.CriterionSetup(name: "Overall Value", weight: 4))
         }
         
         return criteria
