@@ -58,14 +58,13 @@ class CloudKitService: CloudKitServiceProtocol {
             let database = container.privateCloudDatabase
             let record = try await database.record(for: recordID)
             
-            // If the record is a share, return its metadata
-            if let share = record as? CKShare {
-                // Create metadata from the share
-                // Note: CKShare.Metadata is typically obtained from share URLs or system callbacks
-                // For direct record ID lookup, we return nil as metadata requires a share URL
+            // If the record is a share, log it
+            // Note: CKShare.Metadata is typically obtained from share URLs or system callbacks
+            // For direct record ID lookup, we return nil as metadata requires a share URL
+            if record is CKShare {
                 Logger.shared.log("Found share record for: \(recordID.recordName)", level: .info)
-                return nil // Metadata requires share URL, not available from record ID alone
             }
+            return nil // Metadata requires share URL, not available from record ID alone
             
             Logger.shared.log("Record is not a share: \(recordID.recordName)", level: .info)
             return nil

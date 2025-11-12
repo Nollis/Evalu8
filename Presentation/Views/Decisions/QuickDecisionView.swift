@@ -186,7 +186,7 @@ struct QuickDecisionView: View {
                 await MainActor.run {
                     generatedSetup = setup
                     isGenerating = false
-                    HapticManager.shared.notification(.success)
+                    HapticManager.notification(type: .success)
                 }
             } catch {
                 await MainActor.run {
