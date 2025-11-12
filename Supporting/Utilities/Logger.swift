@@ -10,9 +10,13 @@ enum LogLevel: String {
 
 class Logger {
     static let shared = Logger()
-    private let logger = os.log.Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.nollis.evalu8", category: "general")
+    private let logger: os.Logger
     
-    private init() {}
+    private init() {
+        let subsystem = Bundle.main.bundleIdentifier ?? "com.nollis.evalu8"
+        logger = os.Logger(subsystem: subsystem, category: "general")
+    }
+    
     
     func log(_ message: String, level: LogLevel = .info, file: String = #file, function: String = #function, line: Int = #line) {
         #if DEBUG
