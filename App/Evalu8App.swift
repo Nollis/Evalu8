@@ -16,11 +16,23 @@ struct Evalu8App: App {
                 Color(.systemBackground)
                     .ignoresSafeArea()
                 
-                ContentView()
-                    .environment(\.managedObjectContext, DataStore.shared.container.viewContext)
-                    .onAppear {
-                        Logger.shared.log("Evalu8App: ContentView appeared", level: .info)
-                    }
+                VStack {
+                    Text("App is Running!")
+                        .font(.largeTitle)
+                        .foregroundColor(.blue)
+                        .padding()
+                    
+                    Text("If you see this, the app is working")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    ContentView()
+                        .environment(\.managedObjectContext, DataStore.shared.container.viewContext)
+                        .onAppear {
+                            Logger.shared.log("Evalu8App: ContentView appeared", level: .info)
+                            print("Evalu8App: ContentView appeared (print)")
+                        }
+                }
             }
         }
     }
