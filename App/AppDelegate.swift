@@ -40,7 +40,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         Logger.shared.log("Received user activity: \(userActivity.activityType)", level: .info)
         
         if userActivity.activityType == NSUserActivityTypeBrowsingWeb, let url = userActivity.webpageURL {
-            return application(application, open: url, options: [:])
+            return self.application(application, open: url, options: [:])
         }
         
         return false
