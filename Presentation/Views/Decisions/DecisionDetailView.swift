@@ -86,6 +86,12 @@ struct DecisionDetailView: View {
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
+                Button {
+                    viewModel.showingShare = true
+                } label: {
+                    Image(systemName: "person.2")
+                }
+                
                 if !viewModel.options.isEmpty && !viewModel.criteria.isEmpty {
                     Button {
                         viewModel.showingCharts = true
@@ -123,6 +129,9 @@ struct DecisionDetailView: View {
             NavigationStack {
                 DecisionChartsView(decision: viewModel.decision)
             }
+        }
+        .sheet(isPresented: $viewModel.showingShare) {
+            ShareDecisionView(viewModel: viewModel)
         }
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("OK") {

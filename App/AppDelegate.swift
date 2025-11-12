@@ -20,12 +20,17 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                      userDidAcceptCloudKitShareWith shareMetadata: CKShare.Metadata) {
         Logger.shared.log("Received CloudKit share invitation", level: .info)
         
-        let container = CKContainer(identifier: AppConstants.cloudKitContainerIdentifier)
+        let shareService = ShareService()
         
         Task {
             do {
-                try await container.accept(shareMetadata)
+                try await shareService.acceptShare(metadata: shareMetadata)
                 Logger.shared.log("Successfully accepted share", level: .info)
+                
+                // Post notification to refresh UI
+                await MainActor.run {
+                    NotificationCenter.default.post(name: .NSManagedObjectContextDidSave, object: dataStore.container.viewContext)
+                }
             } catch {
                 Logger.shared.log("Failed to accept share: \(error.localizedDescription)", level: .error)
             }
