@@ -17,11 +17,15 @@ class DecisionListViewModel: ObservableObject {
         decisionRepository: DecisionRepositoryProtocol = DecisionRepository(),
         context: NSManagedObjectContext = DataStore.shared.container.viewContext
     ) {
+        Logger.shared.log("DecisionListViewModel: Initializing", level: .info)
         self.decisionRepository = decisionRepository
         self.context = context
+        Logger.shared.log("DecisionListViewModel: Context set, calling observeChanges", level: .info)
         observeChanges()
+        Logger.shared.log("DecisionListViewModel: Calling loadDecisions", level: .info)
         // Load decisions immediately on init
         loadDecisions()
+        Logger.shared.log("DecisionListViewModel: Initialization complete", level: .info)
     }
     
     func loadDecisions() {

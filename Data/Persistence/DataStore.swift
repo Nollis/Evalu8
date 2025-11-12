@@ -34,7 +34,9 @@ class DataStore {
     let container: NSPersistentCloudKitContainer
 
     init(inMemory: Bool = false) {
+        Logger.shared.log("DataStore: Initializing (inMemory: \(inMemory))", level: .info)
         container = NSPersistentCloudKitContainer(name: "Evalu8")
+        Logger.shared.log("DataStore: Container created", level: .info)
         
         // Configure CloudKit with timeouts for initialization
         let cloudKitSetupTimeoutTask = Task {

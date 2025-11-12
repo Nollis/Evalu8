@@ -5,6 +5,10 @@ struct DecisionListView: View {
     @StateObject private var viewModel = DecisionListViewModel()
     @Environment(\.managedObjectContext) private var viewContext
     
+    init() {
+        Logger.shared.log("DecisionListView: Initializing", level: .info)
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack {

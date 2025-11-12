@@ -6,13 +6,22 @@ import CloudKit
 struct Evalu8App: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
+    init() {
+        Logger.shared.log("Evalu8App: App initializing", level: .info)
+    }
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.managedObjectContext, DataStore.shared.container.viewContext)
-                .onAppear {
-                    Logger.shared.log("Evalu8App: ContentView appeared", level: .info)
-                }
+            ZStack {
+                Color(.systemBackground)
+                    .ignoresSafeArea()
+                
+                ContentView()
+                    .environment(\.managedObjectContext, DataStore.shared.container.viewContext)
+                    .onAppear {
+                        Logger.shared.log("Evalu8App: ContentView appeared", level: .info)
+                    }
+            }
         }
     }
 }
