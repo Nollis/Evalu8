@@ -17,7 +17,6 @@ class Logger {
         logger = os.Logger(subsystem: subsystem, category: "general")
     }
     
-    
     func log(_ message: String, level: LogLevel = .info, file: String = #file, function: String = #function, line: Int = #line) {
         #if DEBUG
         let filename = (file as NSString).lastPathComponent
