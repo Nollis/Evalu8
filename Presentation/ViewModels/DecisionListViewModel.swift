@@ -20,6 +20,8 @@ class DecisionListViewModel: ObservableObject {
         self.decisionRepository = decisionRepository
         self.context = context
         observeChanges()
+        // Load decisions immediately on init
+        loadDecisions()
     }
     
     func loadDecisions() {

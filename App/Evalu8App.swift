@@ -10,6 +10,9 @@ struct Evalu8App: App {
         WindowGroup {
             ContentView()
                 .environment(\.managedObjectContext, DataStore.shared.container.viewContext)
+                .onAppear {
+                    Logger.shared.log("Evalu8App: ContentView appeared", level: .info)
+                }
         }
     }
 }
