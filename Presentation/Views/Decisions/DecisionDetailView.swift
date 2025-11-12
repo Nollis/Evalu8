@@ -156,11 +156,11 @@ struct SectionHeader: View {
                 Text(title)
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundColor(.primaryText)
+                    .foregroundColor(Color.primaryText)
                 
                 Text("\(count) \(count == 1 ? "item" : "items")")
                     .font(.subheadline)
-                    .foregroundColor(.secondaryText)
+                    .foregroundColor(Color.secondaryText)
             }
             
             Spacer()
@@ -189,11 +189,11 @@ struct OptionRow: View {
         HStack(spacing: 12) {
             Image(systemName: "circle.fill")
                 .font(.system(size: 8))
-                .foregroundStyle(Color.primaryGradient)
+                .foregroundStyle(Color.primaryGradientStart)
             
             Text(option.name ?? "Unnamed Option")
                 .font(.body)
-                .foregroundColor(.primaryText)
+                .foregroundColor(Color.primaryText)
             
             Spacer()
             
@@ -236,11 +236,11 @@ struct CriterionRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(criterion.name ?? "Unnamed Criterion")
                     .font(.body)
-                    .foregroundColor(.primaryText)
+                    .foregroundColor(Color.primaryText)
                 
                 Text("Weight: \(criterion.weight)")
                     .font(.caption)
-                    .foregroundColor(.secondaryText)
+                    .foregroundColor(Color.secondaryText)
             }
             
             Spacer()
@@ -274,11 +274,11 @@ struct EmptySectionView: View {
         VStack(spacing: 16) {
             Image(systemName: "plus.circle.dashed")
                 .font(.system(size: 40))
-                .foregroundStyle(Color.secondaryGradient.opacity(0.6))
+                .foregroundStyle(Color.secondaryGradientStart.opacity(0.6))
             
             Text(message)
                 .font(.subheadline)
-                .foregroundColor(.secondaryText)
+                .foregroundColor(Color.secondaryText)
             
             Button(action: action) {
                 HStack(spacing: 6) {
