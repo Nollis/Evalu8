@@ -141,6 +141,7 @@ struct QuickDecisionView: View {
                     .padding(.horizontal)
                 }
             }
+            }
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Quick Decision")
             .navigationBarTitleDisplayMode(.inline)
