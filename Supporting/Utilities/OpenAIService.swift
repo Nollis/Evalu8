@@ -10,12 +10,32 @@ class OpenAIService {
     private init() {
         // Get API key from environment variable or Info.plist
         // In production, you'd want to store this securely
-        apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? 
-                 Bundle.main.object(forInfoDictionaryKey: "OpenAIAPIKey") as? String
+        
+        // Try environment variable first
+        if let envKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"], !envKey.isEmpty {
+            self.apiKey = envKey
+            Logger.shared.log("OpenAI API Key loaded from environment variable", level: .info)
+            return
+        }
+        
+        // Fallback to Info.plist
+        if let plistKey = Bundle.main.object(forInfoDictionaryKey: "OpenAIAPIKey") as? String,
+           !plistKey.isEmpty,
+           plistKey != "YOUR_OPENAI_API_KEY_HERE" {
+            self.apiKey = plistKey
+            Logger.shared.log("OpenAI API Key loaded from Info.plist", level: .info)
+            return
+        }
+        
+        self.apiKey = nil
+        Logger.shared.log("OpenAI API Key not found or not configured", level: .warning)
     }
     
     var isAvailable: Bool {
-        return apiKey != nil && !apiKey!.isEmpty
+        guard let key = apiKey, !key.isEmpty, key != "YOUR_OPENAI_API_KEY_HERE" else {
+            return false
+        }
+        return true
     }
     
     /// Generates a decision setup using OpenAI API

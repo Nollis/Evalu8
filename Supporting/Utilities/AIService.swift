@@ -14,14 +14,16 @@ class AIService {
         // Try OpenAI first if available
         if openAIService.isAvailable {
             do {
-                Logger.shared.log("Using OpenAI API for decision generation", level: .info)
-                return try await openAIService.generateQuickDecision(from: query)
+                Logger.shared.log("Using OpenAI API for decision generation with query: \(query)", level: .info)
+                let result = try await openAIService.generateQuickDecision(from: query)
+                Logger.shared.log("OpenAI API succeeded - generated \(result.options.count) options and \(result.criteria.count) criteria", level: .info)
+                return result
             } catch {
-                Logger.shared.log("OpenAI API failed, falling back to local generation: \(error.localizedDescription)", level: .warning)
+                Logger.shared.log("OpenAI API failed, falling back to local generation. Error: \(error.localizedDescription)", level: .error)
                 // Fall through to local generation
             }
         } else {
-            Logger.shared.log("OpenAI API not configured, using local generation", level: .info)
+            Logger.shared.log("OpenAI API not configured (isAvailable: \(openAIService.isAvailable)), using local generation", level: .info)
         }
         
         // Fallback to local pattern-based generation
