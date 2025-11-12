@@ -6,6 +6,7 @@ struct RatingsView: View {
     @State private var selectedOption: Option?
     @State private var showingRatingSheet = false
     @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         ScrollView {
@@ -91,6 +92,13 @@ struct RatingsView: View {
             .padding()
         }
         .navigationTitle("Ratings")
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Done") {
+                    dismiss()
+                }
+            }
+        }
         .sheet(isPresented: $showingRatingSheet) {
             if let option = selectedOption {
                 RatingSheetView(
