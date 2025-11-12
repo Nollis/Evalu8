@@ -152,20 +152,30 @@ struct SectionHeader: View {
     
     var body: some View {
         HStack {
-            Text(title)
-                .font(.title2)
-                .fontWeight(.semibold)
-            
-            Text("(\(count))")
-                .font(.title3)
-                .foregroundColor(.secondary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primaryText)
+                
+                Text("\(count) \(count == 1 ? "item" : "items")")
+                    .font(.subheadline)
+                    .foregroundColor(.secondaryText)
+            }
             
             Spacer()
             
             Button(action: action) {
-                Image(systemName: "plus.circle.fill")
-                    .font(.title3)
-                    .foregroundColor(.blue)
+                ZStack {
+                    Circle()
+                        .fill(Color.primaryGradient)
+                        .frame(width: 36, height: 36)
+                    
+                    Image(systemName: "plus")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+                .shadow(color: Color.primaryGradientStart.opacity(0.3), radius: 4, x: 0, y: 2)
             }
         }
     }
@@ -176,20 +186,34 @@ struct OptionRow: View {
     let onDelete: () -> Void
     
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
+            Image(systemName: "circle.fill")
+                .font(.system(size: 8))
+                .foregroundStyle(Color.primaryGradient)
+            
             Text(option.name ?? "Unnamed Option")
                 .font(.body)
+                .foregroundColor(.primaryText)
             
             Spacer()
             
             Button(action: onDelete) {
                 Image(systemName: "trash")
-                    .foregroundColor(.red)
+                    .font(.system(size: 16))
+                    .foregroundColor(.red.opacity(0.7))
+                    .padding(8)
             }
         }
         .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(8)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.cardBackground)
+                .shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 2)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.cardBorder.opacity(0.2), lineWidth: 1)
+        )
     }
 }
 
@@ -198,26 +222,46 @@ struct CriterionRow: View {
     let onDelete: () -> Void
     
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.primaryGradient.opacity(0.15))
+                    .frame(width: 40, height: 40)
+                
+                Text("\(criterion.weight)")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(Color.primaryGradient)
+            }
+            
             VStack(alignment: .leading, spacing: 4) {
                 Text(criterion.name ?? "Unnamed Criterion")
                     .font(.body)
+                    .foregroundColor(.primaryText)
                 
                 Text("Weight: \(criterion.weight)")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.secondaryText)
             }
             
             Spacer()
             
             Button(action: onDelete) {
                 Image(systemName: "trash")
-                    .foregroundColor(.red)
+                    .font(.system(size: 16))
+                    .foregroundColor(.red.opacity(0.7))
+                    .padding(8)
             }
         }
         .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(8)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.cardBackground)
+                .shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 2)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.cardBorder.opacity(0.2), lineWidth: 1)
+        )
     }
 }
 
@@ -227,21 +271,42 @@ struct EmptySectionView: View {
     let action: () -> Void
     
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 16) {
+            Image(systemName: "plus.circle.dashed")
+                .font(.system(size: 40))
+                .foregroundStyle(Color.secondaryGradient.opacity(0.6))
+            
             Text(message)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(.secondaryText)
             
             Button(action: action) {
-                Label(actionTitle, systemImage: "plus")
-                    .font(.subheadline)
-                    .foregroundColor(.blue)
+                HStack(spacing: 6) {
+                    Image(systemName: "plus")
+                    Text(actionTitle)
+                }
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundStyle(Color.primaryGradient)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.primaryGradient.opacity(0.1))
+                )
             }
         }
         .frame(maxWidth: .infinity)
-        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(8)
+        .padding(.vertical, 24)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.cardBackground.opacity(0.5))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [5]))
+                        .foregroundColor(Color.cardBorder.opacity(0.3))
+                )
+        )
     }
 }
 

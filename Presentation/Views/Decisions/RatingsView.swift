@@ -31,15 +31,26 @@ struct RatingsView: View {
                                 selectedOption = option
                                 showingRatingSheet = true
                             }) {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 4) {
+                                HStack(spacing: 16) {
+                                    // Option icon
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color.secondaryGradient.opacity(0.2))
+                                            .frame(width: 50, height: 50)
+                                        
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .font(.system(size: 24))
+                                            .foregroundStyle(Color.secondaryGradient)
+                                    }
+                                    
+                                    VStack(alignment: .leading, spacing: 6) {
                                         Text(option.name ?? "Unknown Option")
                                             .font(.headline)
-                                            .foregroundColor(.primary)
+                                            .foregroundColor(.primaryText)
                                         
                                         // Show average rating if available
                                         if let avgRating = getAverageRating(for: option) {
-                                            HStack(spacing: 4) {
+                                            HStack(spacing: 6) {
                                                 StarRatingView(
                                                     rating: Int16(avgRating.rounded()),
                                                     maxRating: viewModel.decision.scoringScale,
@@ -47,12 +58,13 @@ struct RatingsView: View {
                                                 )
                                                 Text(String(format: "%.1f", avgRating))
                                                     .font(.caption)
-                                                    .foregroundColor(.secondary)
+                                                    .fontWeight(.medium)
+                                                    .foregroundColor(.secondaryText)
                                             }
                                         } else {
                                             Text("Tap to rate")
                                                 .font(.caption)
-                                                .foregroundColor(.secondary)
+                                                .foregroundColor(.secondaryText)
                                         }
                                     }
                                     
@@ -60,14 +72,17 @@ struct RatingsView: View {
                                     
                                     Image(systemName: "chevron.right")
                                         .font(.caption)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(.secondaryText)
                                 }
                                 .padding()
-                                .background(Color(.systemBackground))
-                                .cornerRadius(10)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(Color.cardBackground)
+                                        .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
+                                )
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(Color(.systemGray4), lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(Color.cardBorder.opacity(0.2), lineWidth: 1)
                                 )
                             }
                             .buttonStyle(.plain)
@@ -322,38 +337,83 @@ struct ScoresSummaryView: View {
     @Environment(\.managedObjectContext) private var viewContext
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Weighted Scores")
-                .font(.headline)
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Image(systemName: "chart.bar.fill")
+                    .foregroundStyle(Color.primaryGradient)
+                Text("Weighted Scores")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primaryText)
+            }
             
             if optionScores.isEmpty {
-                Text("Rate options to see scores")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .padding()
+                HStack {
+                    Spacer()
+                    Text("Rate options to see scores")
+                        .font(.subheadline)
+                        .foregroundColor(.secondaryText)
+                        .padding()
+                    Spacer()
+                }
             } else {
-                ForEach(options.sorted(by: { (optionScores[$0.objectID.uriRepresentation().absoluteString] ?? 0) > (optionScores[$1.objectID.uriRepresentation().absoluteString] ?? 0) }), id: \.objectID) { option in
+                let sortedOptions = options.sorted(by: { (optionScores[$0.objectID.uriRepresentation().absoluteString] ?? 0) > (optionScores[$1.objectID.uriRepresentation().absoluteString] ?? 0) })
+                ForEach(Array(sortedOptions.enumerated()), id: \.element.objectID) { index, option in
                     if let score = optionScores[option.objectID.uriRepresentation().absoluteString] {
-                        HStack {
+                        HStack(spacing: 12) {
+                            // Rank indicator
+                            ZStack {
+                                Circle()
+                                    .fill(Color.primaryGradient.opacity(0.2))
+                                    .frame(width: 32, height: 32)
+                                
+                                Text("\(index + 1)")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundStyle(Color.primaryGradient)
+                            }
+                            
                             Text(option.name ?? "Unknown")
                                 .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(.primaryText)
                             
                             Spacer()
                             
                             Text(String(format: "%.2f", score))
                                 .font(.headline)
-                                .foregroundColor(.blue)
+                                .fontWeight(.bold)
+                                .foregroundStyle(Color.primaryGradient)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.primaryGradient.opacity(0.1))
+                                )
                         }
                         .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.cardBackground)
+                                .shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 2)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.cardBorder.opacity(0.2), lineWidth: 1)
+                        )
                     }
                 }
             }
         }
         .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(10)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.cardBackground.opacity(0.6))
+                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.cardBorder.opacity(0.2), lineWidth: 1)
+        )
         .onAppear {
             calculateScores()
         }

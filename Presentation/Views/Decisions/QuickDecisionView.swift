@@ -17,20 +17,29 @@ struct QuickDecisionView: View {
             ScrollView {
                 VStack(spacing: 24) {
                 // Header
-                VStack(spacing: 8) {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 50))
-                        .foregroundColor(.blue)
+                VStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.primaryGradient.opacity(0.15))
+                            .frame(width: 100, height: 100)
+                        
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 50))
+                            .foregroundStyle(Color.primaryGradient)
+                    }
                     
-                    Text("Quick Decision")
-                        .font(.title)
-                        .fontWeight(.bold)
-                    
-                    Text("Describe what you're deciding on, and we'll set it up for you")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
+                    VStack(spacing: 6) {
+                        Text("Quick Decision")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primaryText)
+                        
+                        Text("Describe what you're deciding on, and we'll set it up for you")
+                            .font(.subheadline)
+                            .foregroundColor(.secondaryText)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
                 }
                 .padding(.top)
                 
@@ -46,16 +55,20 @@ struct QuickDecisionView: View {
                     // Voice Input Button
                     HStack {
                         Button(action: toggleVoiceInput) {
-                            HStack {
+                            HStack(spacing: 8) {
                                 Image(systemName: speechRecognizer.isListening ? "mic.fill" : "mic")
-                                    .foregroundColor(.white)
+                                    .font(.system(size: 18, weight: .semibold))
                                 Text(speechRecognizer.isListening ? "Listening..." : "Use Voice")
+                                    .fontWeight(.semibold)
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(speechRecognizer.isListening ? Color.red : Color.blue)
                             .foregroundColor(.white)
-                            .cornerRadius(10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(speechRecognizer.isListening ? Color.red.gradient : Color.secondaryGradient)
+                            )
+                            .shadow(color: (speechRecognizer.isListening ? Color.red : Color.secondaryGradientStart).opacity(0.3), radius: 6, x: 0, y: 3)
                         }
                         .disabled(isGenerating)
                     }
@@ -85,20 +98,25 @@ struct QuickDecisionView: View {
                 
                 // Generate Button
                 Button(action: generateDecision) {
-                    HStack {
+                    HStack(spacing: 10) {
                         if isGenerating {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
                         } else {
                             Image(systemName: "sparkles")
+                                .font(.system(size: 18, weight: .semibold))
                         }
                         Text(isGenerating ? "Generating..." : "Generate Decision")
+                            .fontWeight(.semibold)
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(canGenerate ? Color.blue : Color.gray)
                     .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(canGenerate ? Color.primaryGradient : LinearGradient(colors: [Color.gray, Color.gray.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    )
+                    .shadow(color: canGenerate ? Color.primaryGradientStart.opacity(0.4) : Color.clear, radius: 8, x: 0, y: 4)
                 }
                 .disabled(!canGenerate || isGenerating)
                 .padding(.horizontal)

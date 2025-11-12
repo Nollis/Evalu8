@@ -42,12 +42,14 @@ struct DecisionListView: View {
                         viewModel.showingQuickDecision = true
                     }) {
                         Image(systemName: "sparkles")
+                            .foregroundStyle(Color.primaryGradient)
                     }
                     
                     Button(action: {
                         viewModel.showingAddDecision = true
                     }) {
                         Image(systemName: "plus")
+                            .foregroundStyle(Color.primaryGradient)
                     }
                 }
             }
@@ -83,20 +85,28 @@ struct DecisionRow: View {
     let decision: Decision
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: decision.iconName ?? "folder")
-                    .foregroundColor(.blue)
-                    .font(.title3)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
+                // Icon with gradient background
+                ZStack {
+                    Circle()
+                        .fill(Color.primaryGradient)
+                        .frame(width: 44, height: 44)
+                    
+                    Image(systemName: decision.iconName ?? "folder")
+                        .foregroundColor(.white)
+                        .font(.system(size: 20, weight: .semibold))
+                }
                 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(decision.title ?? "Untitled Decision")
                         .font(.headline)
+                        .foregroundColor(.primaryText)
                     
                     if let desc = decision.desc, !desc.isEmpty {
                         Text(desc)
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.secondaryText)
                             .lineLimit(2)
                     }
                 }
@@ -104,25 +114,46 @@ struct DecisionRow: View {
                 Spacer()
             }
             
-            HStack {
-                Label("\(decision.options?.count ?? 0)", systemImage: "list.bullet")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            HStack(spacing: 16) {
+                HStack(spacing: 4) {
+                    Image(systemName: "list.bullet")
+                        .font(.caption)
+                        .foregroundColor(.brandPrimary)
+                    Text("\(decision.options?.count ?? 0)")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primaryText)
+                }
                 
-                Label("\(decision.criteria?.count ?? 0)", systemImage: "checkmark.circle")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle")
+                        .font(.caption)
+                        .foregroundColor(.brandPrimary)
+                    Text("\(decision.criteria?.count ?? 0)")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primaryText)
+                }
                 
                 Spacer()
                 
                 if let dateCreated = decision.dateCreated {
                     Text(dateCreated, style: .date)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(.caption2)
+                        .foregroundColor(.secondaryText)
                 }
             }
         }
-        .padding(.vertical, 4)
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.cardBackground)
+                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.cardBorder.opacity(0.3), lineWidth: 1)
+        )
     }
 }
 
@@ -133,28 +164,44 @@ struct EmptyStateView: View {
     let action: () -> Void
     
     var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "tray")
-                .font(.system(size: 60))
-                .foregroundColor(.secondary)
+        VStack(spacing: 24) {
+            ZStack {
+                Circle()
+                    .fill(Color.primaryGradient.opacity(0.1))
+                    .frame(width: 120, height: 120)
+                
+                Image(systemName: "tray")
+                    .font(.system(size: 50))
+                    .foregroundStyle(Color.primaryGradient)
+            }
             
-            Text(title)
-                .font(.title2)
-                .fontWeight(.semibold)
-            
-            Text(message)
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
+            VStack(spacing: 8) {
+                Text(title)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.primaryText)
+                
+                Text(message)
+                    .font(.body)
+                    .foregroundColor(.secondaryText)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            }
             
             Button(action: action) {
-                Label(actionTitle, systemImage: "plus.circle.fill")
-                    .font(.headline)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+                HStack(spacing: 8) {
+                    Image(systemName: "plus.circle.fill")
+                    Text(actionTitle)
+                }
+                .font(.headline)
+                .foregroundColor(.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 14)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.primaryGradient)
+                )
+                .shadow(color: Color.primaryGradientStart.opacity(0.3), radius: 8, x: 0, y: 4)
             }
         }
     }
