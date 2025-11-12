@@ -454,7 +454,7 @@ struct ScoresSummaryView: View {
     
     private func calculateScores() {
         let ratingRepository = RatingRepository()
-        let maxWeight = criteria.map { $0.weight }.max() ?? 1
+        let maxWeight = max(criteria.map { $0.weight }.max() ?? 1, 1)
         
         var scores: [String: Double] = [:]
         

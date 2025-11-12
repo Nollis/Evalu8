@@ -8,8 +8,25 @@ enum ScoreCalculator {
     ///   - maxWeight: The maximum possible weight
     /// - Returns: A normalized score between 0 and 1
     static func normalizedScore(ratingValue: Int16, criterionWeight: Int16, maxWeight: Int16) -> Double {
+        // Guard against division by zero
+        guard maxWeight > 0 else {
+            return 0.0
+        }
+        
+        let denominator = 5.0 * Double(maxWeight)
+        guard denominator > 0 else {
+            return 0.0
+        }
+        
         // Normalize so that the score is between 0 and 1
-        return (Double(ratingValue) * Double(criterionWeight)) / (5.0 * Double(maxWeight))
+        let score = (Double(ratingValue) * Double(criterionWeight)) / denominator
+        
+        // Ensure score is valid (not NaN or Infinity)
+        guard score.isFinite else {
+            return 0.0
+        }
+        
+        return score
     }
     
     /// Calculates weighted score for an option across all criteria
@@ -23,6 +40,11 @@ enum ScoreCalculator {
         criterionWeights: [String: Int16],
         maxWeight: Int16
     ) -> Double {
+        // Guard against invalid maxWeight
+        guard maxWeight > 0 else {
+            return 0.0
+        }
+        
         var totalScore: Double = 0.0
         
         for (criterionID, rating) in ratings {
@@ -33,6 +55,11 @@ enum ScoreCalculator {
                     maxWeight: maxWeight
                 )
             }
+        }
+        
+        // Ensure total score is valid (not NaN or Infinity)
+        guard totalScore.isFinite else {
+            return 0.0
         }
         
         return totalScore

@@ -122,7 +122,7 @@ struct DecisionChartsView: View {
         }
         
         let ratingRepository = RatingRepository()
-        let maxWeight = criteria.map { $0.weight }.max() ?? 1
+        let maxWeight = max(criteria.map { $0.weight }.max() ?? 1, 1)
         
         var dataPoints: [ChartDataPoint] = []
         
@@ -148,6 +148,11 @@ struct DecisionChartsView: View {
                 maxWeight: maxWeight
             )
             
+            // Only add valid scores (not NaN or Infinity)
+            guard score.isFinite else {
+                continue
+            }
+            
             dataPoints.append(ChartDataPoint(
                 optionName: option.name ?? "Unknown",
                 score: score
@@ -162,12 +167,17 @@ struct DecisionChartsView: View {
         let ratingRepository = RatingRepository()
         do {
             if let rating = try ratingRepository.fetch(for: option, criterion: criterion, userID: nil) {
-                let maxWeight = (decision.criteria?.allObjects as? [Criterion])?.map { $0.weight }.max() ?? 1
-                return ScoreCalculator.normalizedScore(
+                let maxWeight = max((decision.criteria?.allObjects as? [Criterion])?.map { $0.weight }.max() ?? 1, 1)
+                let score = ScoreCalculator.normalizedScore(
                     ratingValue: rating.ratingValue,
                     criterionWeight: criterion.weight,
                     maxWeight: maxWeight
                 )
+                // Only return valid scores (not NaN or Infinity)
+                guard score.isFinite else {
+                    return nil
+                }
+                return score
             }
         } catch {
             // Ignore errors
