@@ -125,7 +125,9 @@ class DecisionDetailViewModel: ObservableObject {
             object: context,
             queue: .main
         ) { [weak self] _ in
-            self?.loadData()
+            Task { @MainActor in
+                self?.loadData()
+            }
         }
     }
 }

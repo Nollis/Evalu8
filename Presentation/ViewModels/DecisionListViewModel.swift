@@ -50,7 +50,7 @@ class DecisionListViewModel: ObservableObject {
     
     func createDecision(title: String, description: String?, scoringScale: Int16) {
         do {
-            let decision = try decisionRepository.create(
+            _ = try decisionRepository.create(
                 title: title,
                 description: description,
                 scoringScale: scoringScale
@@ -104,7 +104,9 @@ class DecisionListViewModel: ObservableObject {
             object: context,
             queue: .main
         ) { [weak self] _ in
-            self?.loadDecisions()
+            Task { @MainActor in
+                self?.loadDecisions()
+            }
         }
     }
 }

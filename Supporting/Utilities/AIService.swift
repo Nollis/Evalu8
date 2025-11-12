@@ -56,7 +56,7 @@ class AIService {
         let lowercased = query.lowercased()
         var decisionType = ""
         var title = ""
-        var context = query
+        let context = query
         
         // Try to extract product/item name using regex
         let patterns = [

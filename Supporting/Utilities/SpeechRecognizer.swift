@@ -117,9 +117,14 @@ class SpeechRecognizer: ObservableObject {
     }
     
     deinit {
-        Task { @MainActor in
-            stopListening()
-        }
+        // Stop listening synchronously without capturing self
+        audioEngine.stop()
+        audioEngine.inputNode.removeTap(onBus: 0)
+        recognitionRequest?.endAudio()
+        recognitionRequest = nil
+        recognitionTask?.cancel()
+        recognitionTask = nil
+        try? AVAudioSession.sharedInstance().setActive(false)
     }
 }
 
