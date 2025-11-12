@@ -245,9 +245,9 @@ struct RatingCellView: View {
             forName: .NSManagedObjectContextDidSave,
             object: viewContext,
             queue: .main
-        ) { [weak self] _ in
+        ) { _ in
             Task { @MainActor in
-                self?.loadRating()
+                loadRating()
             }
         }
     }
