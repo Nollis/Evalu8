@@ -63,11 +63,10 @@ class CloudKitService: CloudKitServiceProtocol {
             // For direct record ID lookup, we return nil as metadata requires a share URL
             if record is CKShare {
                 Logger.shared.log("Found share record for: \(recordID.recordName)", level: .info)
+            } else {
+                Logger.shared.log("Record is not a share: \(recordID.recordName)", level: .info)
             }
             return nil // Metadata requires share URL, not available from record ID alone
-            
-            Logger.shared.log("Record is not a share: \(recordID.recordName)", level: .info)
-            return nil
         } catch {
             Logger.shared.log("Error fetching share metadata: \(error.localizedDescription)", level: .error)
             if let ckError = error as? CKError {
