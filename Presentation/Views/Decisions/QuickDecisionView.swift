@@ -10,10 +10,12 @@ struct QuickDecisionView: View {
     @State private var isGenerating = false
     @State private var generatedSetup: QuickDecisionSetup?
     @State private var showingPreview = false
+    @FocusState private var isTextFieldFocused: Bool
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 24) {
+            ScrollView {
+                VStack(spacing: 24) {
                 // Header
                 VStack(spacing: 8) {
                     Image(systemName: "sparkles")
@@ -39,6 +41,7 @@ struct QuickDecisionView: View {
                         .textFieldStyle(.roundedBorder)
                         .lineLimit(3...6)
                         .disabled(isGenerating || speechRecognizer.isListening)
+                        .focused($isTextFieldFocused)
                     
                     // Voice Input Button
                     HStack {
@@ -137,9 +140,8 @@ struct QuickDecisionView: View {
                     }
                     .padding(.horizontal)
                 }
-                
-                Spacer()
             }
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Quick Decision")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -176,6 +178,9 @@ struct QuickDecisionView: View {
     
     private func generateDecision() {
         guard !queryText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        
+        // Dismiss keyboard
+        isTextFieldFocused = false
         
         isGenerating = true
         generatedSetup = nil
