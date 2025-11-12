@@ -9,14 +9,21 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         print("AppDelegate: didFinishLaunchingWithOptions called")
         Logger.shared.log("AppDelegate: didFinishLaunchingWithOptions called", level: .info)
         
-        print("AppDelegate: Creating DataStore.shared")
-        dataStore = DataStore.shared
-        print("AppDelegate: DataStore.shared created")
-        
-        // Ensure UUIDs for all existing decisions
-        print("AppDelegate: Calling ensureUUIDsForExistingDecisions")
-        ensureUUIDsForExistingDecisions()
-        print("AppDelegate: ensureUUIDsForExistingDecisions completed")
+        // Defer DataStore initialization to avoid blocking
+        Task { @MainActor in
+            print("AppDelegate: Creating DataStore.shared (async)")
+            do {
+                dataStore = DataStore.shared
+                print("AppDelegate: DataStore.shared created")
+                
+                // Ensure UUIDs for all existing decisions
+                print("AppDelegate: Calling ensureUUIDsForExistingDecisions")
+                ensureUUIDsForExistingDecisions()
+                print("AppDelegate: ensureUUIDsForExistingDecisions completed")
+            } catch {
+                print("AppDelegate: Error initializing DataStore: \(error)")
+            }
+        }
         
         print("AppDelegate: Returning true")
         return true
