@@ -99,8 +99,35 @@ struct RatingsView: View {
                     viewModel: viewModel
                 )
             } else {
-                Text("No option selected")
+                NavigationStack {
+                    VStack(spacing: 16) {
+                        Text("No option selected")
+                            .font(.headline)
+                        Text("Please select an option to rate")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Button("Close") {
+                            showingRatingSheet = false
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
                     .padding()
+                    .navigationTitle("Error")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Close") {
+                                showingRatingSheet = false
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .onChange(of: showingRatingSheet) { _, isShowing in
+            if !isShowing {
+                // Clear selection when sheet is dismissed
+                selectedOption = nil
             }
         }
     }
