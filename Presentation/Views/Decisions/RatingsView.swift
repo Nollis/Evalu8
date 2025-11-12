@@ -98,6 +98,9 @@ struct RatingsView: View {
                     decision: viewModel.decision,
                     viewModel: viewModel
                 )
+            } else {
+                Text("No option selected")
+                    .padding()
             }
         }
     }
@@ -195,43 +198,67 @@ struct RatingSheetView: View {
     let decision: Decision
     @ObservedObject var viewModel: DecisionDetailViewModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.managedObjectContext) private var viewContext
     
     @State private var ratings: [String: Int16] = [:]
+    @State private var isLoading = true
+    
+    private var scoringScale: Int16 {
+        max(decision.scoringScale, 5) // Default to 5 if 0 or invalid
+    }
     
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
-                    Text(option.name ?? "Unknown Option")
-                        .font(.headline)
-                }
-                
-                Section("Rate against criteria") {
-                    ForEach(criteria) { criterion in
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(criterion.name ?? "Unknown")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                            
-                            HStack {
-                                Text("Weight: \(criterion.weight)")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                
-                                Spacer()
-                                
-                                StarRatingView(
-                                    rating: ratings[criterion.objectID.uriRepresentation().absoluteString] ?? 0,
-                                    maxRating: decision.scoringScale,
-                                    interactive: true
-                                ) { newRating in
-                                    ratings[criterion.objectID.uriRepresentation().absoluteString] = newRating
-                                    // Auto-save on change
-                                    saveRating(for: criterion, value: newRating)
+            Group {
+                if criteria.isEmpty {
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 50))
+                            .foregroundColor(.orange)
+                        Text("No criteria available")
+                            .font(.headline)
+                        Text("Add criteria to this decision before rating")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding()
+                } else {
+                    Form {
+                        Section {
+                            Text(option.name ?? "Unknown Option")
+                                .font(.headline)
+                        }
+                        
+                        Section("Rate against criteria") {
+                            ForEach(criteria, id: \.objectID) { criterion in
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(criterion.name ?? "Unknown")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                    
+                                    HStack {
+                                        Text("Weight: \(criterion.weight)")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                        
+                                        Spacer()
+                                        
+                                        StarRatingView(
+                                            rating: ratings[criterion.objectID.uriRepresentation().absoluteString] ?? 0,
+                                            maxRating: scoringScale,
+                                            interactive: true
+                                        ) { newRating in
+                                            ratings[criterion.objectID.uriRepresentation().absoluteString] = newRating
+                                            // Auto-save on change
+                                            saveRating(for: criterion, value: newRating)
+                                        }
+                                    }
                                 }
+                                .padding(.vertical, 4)
                             }
                         }
-                        .padding(.vertical, 4)
                     }
                 }
             }
@@ -251,7 +278,16 @@ struct RatingSheetView: View {
     }
     
     private func loadExistingRatings() {
-        let ratingRepository = RatingRepository()
+        guard !criteria.isEmpty else {
+            isLoading = false
+            return
+        }
+        
+        // Use the environment context
+        let context = viewContext
+        let ratingRepository = RatingRepository(context: context)
+        
+        // Use the option directly - it should be in the same context
         for criterion in criteria {
             do {
                 if let rating = try ratingRepository.fetch(for: option, criterion: criterion, userID: nil) {
@@ -260,13 +296,18 @@ struct RatingSheetView: View {
                     ratings[criterion.objectID.uriRepresentation().absoluteString] = 0
                 }
             } catch {
+                Logger.shared.log("Error loading rating: \(error.localizedDescription)", level: .error)
                 ratings[criterion.objectID.uriRepresentation().absoluteString] = 0
             }
         }
+        
+        isLoading = false
     }
     
     private func saveRating(for criterion: Criterion, value: Int16) {
-        let ratingRepository = RatingRepository()
+        let context = viewContext
+        let ratingRepository = RatingRepository(context: context)
+        
         do {
             _ = try ratingRepository.createOrUpdate(
                 option: option,
@@ -277,6 +318,7 @@ struct RatingSheetView: View {
             )
             HapticManager.selection()
         } catch {
+            Logger.shared.log("Error saving rating: \(error.localizedDescription)", level: .error)
             viewModel.errorMessage = "Failed to save rating: \(error.localizedDescription)"
         }
     }
