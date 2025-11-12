@@ -117,7 +117,9 @@ class SpeechRecognizer: ObservableObject {
     }
     
     deinit {
-        stopListening()
+        Task { @MainActor in
+            stopListening()
+        }
     }
 }
 

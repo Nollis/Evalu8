@@ -29,12 +29,13 @@ class ShareService: ShareServiceProtocol {
         }
         
         // Get the CloudKit record for this decision
-        guard let recordIDString = decision.rootRecordID,
-              let recordID = CKRecord.ID(recordName: recordIDString) else {
+        guard let recordIDString = decision.rootRecordID else {
             // If no record ID exists, we need to create one
             // This would typically be handled by Core Data + CloudKit sync
             throw ShareError.notShared
         }
+        
+        let recordID = CKRecord.ID(recordName: recordIDString)
         
         // Fetch the record
         let container = CKContainer(identifier: AppConstants.cloudKitContainerIdentifier)
@@ -45,8 +46,8 @@ class ShareService: ShareServiceProtocol {
             
             // Create or fetch existing share
             let share: CKShare
-            if let existingShareRecordID = decision.shareRecordID,
-               let shareID = CKRecord.ID(recordName: existingShareRecordID) {
+            if let existingShareRecordID = decision.shareRecordID {
+                let shareID = CKRecord.ID(recordName: existingShareRecordID)
                 // Try to fetch existing share
                 share = try await database.record(for: shareID) as? CKShare ?? CKShare(rootRecord: record)
             } else {
@@ -116,10 +117,11 @@ class ShareService: ShareServiceProtocol {
     }
     
     func removeShare(for decision: Decision) async throws {
-        guard let shareRecordIDString = decision.shareRecordID,
-              let shareRecordID = CKRecord.ID(recordName: shareRecordIDString) else {
+        guard let shareRecordIDString = decision.shareRecordID else {
             throw ShareError.notShared
         }
+        
+        let shareRecordID = CKRecord.ID(recordName: shareRecordIDString)
         
         let container = CKContainer(identifier: AppConstants.cloudKitContainerIdentifier)
         let database = container.privateCloudDatabase
