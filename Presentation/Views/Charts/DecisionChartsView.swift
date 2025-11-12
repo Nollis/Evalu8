@@ -31,11 +31,14 @@ struct DecisionChartsView: View {
                             .font(.headline)
                         
                         Chart(chartData) { dataPoint in
-                            BarMark(
-                                x: .value("Option", dataPoint.optionName),
-                                y: .value("Score", dataPoint.score)
-                            )
-                            .foregroundStyle(.blue.gradient)
+                            // Ensure score is valid before rendering
+                            if dataPoint.score.isFinite {
+                                BarMark(
+                                    x: .value("Option", dataPoint.optionName),
+                                    y: .value("Score", max(0, dataPoint.score)) // Ensure non-negative
+                                )
+                                .foregroundStyle(.blue.gradient)
+                            }
                         }
                         .frame(height: 300)
                         .chartXAxis {
@@ -65,10 +68,11 @@ struct DecisionChartsView: View {
                             Chart {
                                 ForEach(criteria, id: \.objectID) { criterion in
                                     ForEach(options, id: \.objectID) { option in
-                                        if let score = getScore(for: option, criterion: criterion) {
+                                        if let score = getScore(for: option, criterion: criterion),
+                                           score.isFinite {
                                             BarMark(
                                                 x: .value("Criterion", criterion.name ?? "Unknown"),
-                                                y: .value("Score", score),
+                                                y: .value("Score", max(0, min(1, score))), // Clamp between 0-1 for normalized
                                                 stacking: .normalized
                                             )
                                             .foregroundStyle(by: .value("Option", option.name ?? "Unknown"))
@@ -159,7 +163,10 @@ struct DecisionChartsView: View {
             ))
         }
         
-        chartData = dataPoints.sorted { $0.score > $1.score }
+        // Filter out any invalid scores and sort
+        chartData = dataPoints
+            .filter { $0.score.isFinite && $0.score >= 0 }
+            .sorted { $0.score > $1.score }
         isLoading = false
     }
     

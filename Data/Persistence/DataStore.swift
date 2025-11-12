@@ -93,6 +93,7 @@ class DataStore {
             
             // Explicitly try to initialize/update the CloudKit schema (for development)
             // Note: initializeCloudKitSchema() is synchronous but can take time, so run it in background
+            // Also note: This will fail in simulator without iCloud account - that's expected
             if !DevelopmentConfig.bypassCloudKit {
                 Task.detached(priority: .utility) {
                     do {
@@ -100,7 +101,13 @@ class DataStore {
                         try self.container.initializeCloudKitSchema()
                         Logger.shared.log("CloudKit schema initialization attempt completed", level: .info)
                     } catch {
-                        Logger.shared.log("Error initializing CloudKit schema: \(error.localizedDescription)", level: .error)
+                        // Check if it's the expected "no iCloud account" error
+                        let nsError = error as NSError
+                        if nsError.domain == NSCocoaErrorDomain && nsError.code == 134400 {
+                            Logger.shared.log("CloudKit initialization skipped - no iCloud account (expected in simulator)", level: .info)
+                        } else {
+                            Logger.shared.log("Error initializing CloudKit schema: \(error.localizedDescription)", level: .warning)
+                        }
                     }
                 }
             }
