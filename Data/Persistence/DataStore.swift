@@ -77,8 +77,11 @@ class DataStore {
         // Load the persistent stores
         container.loadPersistentStores { storeDescription, error in
             if let error = error as NSError? {
-                Logger.shared.log("Failed to load persistent store: \(storeDescription.url?.lastPathComponent ?? "N/A")", level: .error)
-                fatalError("Unresolved error \(error), \(error.userInfo)")
+                Logger.shared.log("Failed to load persistent store: \(storeDescription.url?.lastPathComponent ?? "N/A") - \(error.localizedDescription)", level: .error)
+                Logger.shared.log("Error details: \(error.userInfo)", level: .error)
+                // Don't fatalError - allow app to continue with degraded functionality
+                // fatalError("Unresolved error \(error), \(error.userInfo)")
+                return
             }
             Logger.shared.log("Successfully loaded persistent store: \(storeDescription.url?.lastPathComponent ?? "N/A")", level: .info)
             Logger.shared.log("CloudKit container setup completed", level: .info)
@@ -88,12 +91,14 @@ class DataStore {
             
             // Explicitly try to initialize/update the CloudKit schema (for development)
             if !DevelopmentConfig.bypassCloudKit {
-                do {
-                    Logger.shared.log("Attempting to initialize CloudKit schema...", level: .info)
-                    try self.container.initializeCloudKitSchema()
-                    Logger.shared.log("CloudKit schema initialization attempt completed", level: .info)
-                } catch {
-                    Logger.shared.log("Error initializing CloudKit schema: \(error.localizedDescription)", level: .error)
+                Task {
+                    do {
+                        Logger.shared.log("Attempting to initialize CloudKit schema...", level: .info)
+                        try await self.container.initializeCloudKitSchema()
+                        Logger.shared.log("CloudKit schema initialization attempt completed", level: .info)
+                    } catch {
+                        Logger.shared.log("Error initializing CloudKit schema: \(error.localizedDescription)", level: .error)
+                    }
                 }
             }
         }
