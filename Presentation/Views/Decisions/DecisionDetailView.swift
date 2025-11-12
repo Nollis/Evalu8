@@ -225,7 +225,7 @@ struct CriterionRow: View {
         HStack(spacing: 12) {
             ZStack {
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.primaryGradient.opacity(0.15))
+                    .fill(Color.primaryGradientStart.opacity(0.15))
                     .frame(width: 40, height: 40)
                 
                 Text("\(criterion.weight)")
@@ -292,7 +292,7 @@ struct EmptySectionView: View {
                 .padding(.vertical, 8)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.primaryGradient.opacity(0.1))
+                        .fill(Color.primaryGradientStart.opacity(0.1))
                 )
             }
         }

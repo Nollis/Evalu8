@@ -165,15 +165,15 @@ struct EmptyStateView: View {
     
     var body: some View {
         VStack(spacing: 24) {
-            ZStack {
-                Circle()
-                    .fill(Color.primaryGradient.opacity(0.1))
-                    .frame(width: 120, height: 120)
-                
-                Image(systemName: "tray")
-                    .font(.system(size: 50))
-                    .foregroundStyle(Color.primaryGradient)
-            }
+                ZStack {
+                    Circle()
+                        .fill(Color.primaryGradientStart.opacity(0.1))
+                        .frame(width: 120, height: 120)
+                    
+                    Image(systemName: "tray")
+                        .font(.system(size: 50))
+                        .foregroundStyle(Color.primaryGradient)
+                }
             
             VStack(spacing: 8) {
                 Text(title)

@@ -364,7 +364,7 @@ struct ScoresSummaryView: View {
                             // Rank indicator
                             ZStack {
                                 Circle()
-                                    .fill(Color.primaryGradient.opacity(0.2))
+                                    .fill(Color.primaryGradientStart.opacity(0.2))
                                     .frame(width: 32, height: 32)
                                 
                                 Text("\(index + 1)")
@@ -387,7 +387,7 @@ struct ScoresSummaryView: View {
                                 .padding(.vertical, 6)
                                 .background(
                                     RoundedRectangle(cornerRadius: 8)
-                                        .fill(Color.primaryGradient.opacity(0.1))
+                                        .fill(Color.primaryGradientStart.opacity(0.1))
                                 )
                         }
                         .padding()

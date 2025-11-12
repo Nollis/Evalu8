@@ -20,7 +20,7 @@ struct QuickDecisionView: View {
                 VStack(spacing: 12) {
                     ZStack {
                         Circle()
-                            .fill(Color.primaryGradient.opacity(0.15))
+                            .fill(Color.primaryGradientStart.opacity(0.15))
                             .frame(width: 100, height: 100)
                         
                         Image(systemName: "sparkles")
