@@ -58,6 +58,10 @@
 	<string>We need speech recognition to convert your voice input into text for quick decision creation.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>We need microphone access to record your voice for quick decision creation.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>
 
