@@ -5,6 +5,7 @@ struct RatingsView: View {
     @ObservedObject var viewModel: DecisionDetailViewModel
     @State private var selectedOption: Option?
     @State private var showingRatingSheet = false
+    @Environment(\.managedObjectContext) private var viewContext
     
     var body: some View {
         ScrollView {
@@ -128,7 +129,13 @@ struct RatingsView: View {
             if !isShowing {
                 // Clear selection when sheet is dismissed
                 selectedOption = nil
+                // Reload data to refresh ratings display
+                viewModel.loadData()
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .NSManagedObjectContextDidSave)) { _ in
+            // Reload when Core Data saves to update ratings
+            viewModel.loadData()
         }
     }
 }
@@ -141,16 +148,22 @@ struct RatingRowView: View {
     
     var body: some View {
         HStack(spacing: 0) {
-            // Option name
-            Text(option.name ?? "Unknown")
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .frame(width: 100, alignment: .leading)
-                .padding(.horizontal, 8)
+            // Option name - make it tappable too
+            Button(action: {
+                onRatingTap(option, criteria.first ?? Criterion())
+            }) {
+                Text(option.name ?? "Unknown")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+                    .frame(width: 100, alignment: .leading)
+                    .padding(.horizontal, 8)
+            }
+            .buttonStyle(.plain)
             
             // Ratings for each criterion
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
+                HStack(spacing: 8) {
                     ForEach(criteria) { criterion in
                         RatingCellView(
                             option: option,
@@ -175,27 +188,36 @@ struct RatingCellView: View {
     let onTap: () -> Void
     
     @State private var currentRating: Int16 = 0
+    @Environment(\.managedObjectContext) private var viewContext
     
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 4) {
+            VStack(spacing: 6) {
                 StarRatingView(
                     rating: currentRating,
                     maxRating: option.decision?.scoringScale ?? 5,
                     interactive: false
                 )
-                Text(currentRating == 0 ? "-" : "\(currentRating)")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
+                Text(currentRating == 0 ? "Tap" : "\(currentRating)")
+                    .font(.caption)
+                    .foregroundColor(currentRating == 0 ? .secondary : .primary)
+                    .fontWeight(currentRating == 0 ? .regular : .semibold)
             }
-            .frame(width: 80)
-            .padding(.vertical, 8)
+            .frame(minWidth: 100, minHeight: 70)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 8)
             .background(Color(.systemBackground))
-            .cornerRadius(6)
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(currentRating == 0 ? Color(.systemGray4) : Color.blue.opacity(0.3), lineWidth: currentRating == 0 ? 1 : 2)
+            )
         }
         .buttonStyle(.plain)
         .onAppear {
             loadRating()
+            observeChanges()
         }
         .onChange(of: option.objectID) { _, _ in
             loadRating()
@@ -206,7 +228,7 @@ struct RatingCellView: View {
     }
     
     private func loadRating() {
-        let ratingRepository = RatingRepository()
+        let ratingRepository = RatingRepository(context: viewContext)
         do {
             if let rating = try ratingRepository.fetch(for: option, criterion: criterion, userID: nil) {
                 currentRating = rating.ratingValue
@@ -215,6 +237,18 @@ struct RatingCellView: View {
             }
         } catch {
             currentRating = 0
+        }
+    }
+    
+    private func observeChanges() {
+        NotificationCenter.default.addObserver(
+            forName: .NSManagedObjectContextDidSave,
+            object: viewContext,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.loadRating()
+            }
         }
     }
 }
@@ -344,6 +378,9 @@ struct RatingSheetView: View {
                 userDisplayName: nil
             )
             HapticManager.selection()
+            
+            // Notify that data has changed to update other views
+            NotificationCenter.default.post(name: .NSManagedObjectContextDidSave, object: context)
         } catch {
             Logger.shared.log("Error saving rating: \(error.localizedDescription)", level: .error)
             viewModel.errorMessage = "Failed to save rating: \(error.localizedDescription)"
@@ -357,6 +394,7 @@ struct ScoresSummaryView: View {
     let decision: Decision
     
     @State private var optionScores: [String: Double] = [:]
+    @Environment(\.managedObjectContext) private var viewContext
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -398,6 +436,10 @@ struct ScoresSummaryView: View {
             calculateScores()
         }
         .onChange(of: criteria.count) { _, _ in
+            calculateScores()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .NSManagedObjectContextDidSave)) { _ in
+            // Recalculate scores when ratings change
             calculateScores()
         }
     }
