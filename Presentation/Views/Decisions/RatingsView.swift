@@ -13,9 +13,9 @@ struct RatingsView: View {
             VStack(alignment: .leading, spacing: 20) {
                 // Instructions
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Rate each option against all criteria")
+                    Text("Rate each option")
                         .font(.headline)
-                    Text("Tap on any cell to rate")
+                    Text("Tap an option to rate it against all criteria")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -23,56 +23,63 @@ struct RatingsView: View {
                 .background(Color(.systemGray6))
                 .cornerRadius(10)
                 
-                // Ratings Matrix
-                if !viewModel.options.isEmpty && !viewModel.criteria.isEmpty {
+                // Options List
+                if !viewModel.options.isEmpty {
                     VStack(spacing: 12) {
-                        // Header row with criteria
-                        HStack(spacing: 0) {
-                            Text("Option")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .frame(width: 100, alignment: .leading)
-                                .padding(.horizontal, 8)
-                            
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 12) {
-                                    ForEach(viewModel.criteria) { criterion in
-                                        Text(criterion.name ?? "Unknown")
-                                            .font(.caption)
-                                            .fontWeight(.semibold)
-                                            .frame(width: 80)
-                                            .lineLimit(2)
-                                            .multilineTextAlignment(.center)
-                                    }
-                                }
-                                .padding(.horizontal, 8)
-                            }
-                        }
-                        .padding(.vertical, 8)
-                        .background(Color(.systemGray5))
-                        
-                        // Option rows
                         ForEach(viewModel.options) { option in
-                            RatingRowView(
-                                option: option,
-                                criteria: viewModel.criteria,
-                                decision: viewModel.decision,
-                                onRatingTap: { tappedOption, criterion in
-                                    selectedOption = tappedOption
-                                    showingRatingSheet = true
+                            Button(action: {
+                                selectedOption = option
+                                showingRatingSheet = true
+                            }) {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(option.name ?? "Unknown Option")
+                                            .font(.headline)
+                                            .foregroundColor(.primary)
+                                        
+                                        // Show average rating if available
+                                        if let avgRating = getAverageRating(for: option) {
+                                            HStack(spacing: 4) {
+                                                StarRatingView(
+                                                    rating: Int16(avgRating.rounded()),
+                                                    maxRating: viewModel.decision.scoringScale,
+                                                    interactive: false
+                                                )
+                                                Text(String(format: "%.1f", avgRating))
+                                                    .font(.caption)
+                                                    .foregroundColor(.secondary)
+                                            }
+                                        } else {
+                                            Text("Tap to rate")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
                                 }
-                            )
+                                .padding()
+                                .background(Color(.systemBackground))
+                                .cornerRadius(10)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color(.systemGray4), lineWidth: 1)
+                                )
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
-                    .padding()
-                    .background(Color(.systemBackground))
-                    .cornerRadius(10)
+                    .padding(.horizontal)
                 } else {
                     VStack(spacing: 12) {
                         Image(systemName: "star.circle")
                             .font(.system(size: 50))
                             .foregroundColor(.secondary)
-                        Text("Add options and criteria to start rating")
+                        Text("Add options to start rating")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -146,120 +153,30 @@ struct RatingsView: View {
             viewModel.loadData()
         }
     }
-}
-
-struct RatingRowView: View {
-    let option: Option
-    let criteria: [Criterion]
-    let decision: Decision
-    let onRatingTap: (Option, Criterion) -> Void
     
-    var body: some View {
-        HStack(spacing: 0) {
-            // Option name - make it tappable too
-            Button(action: {
-                onRatingTap(option, criteria.first ?? Criterion())
-            }) {
-                Text(option.name ?? "Unknown")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
-                    .frame(width: 100, alignment: .leading)
-                    .padding(.horizontal, 8)
-            }
-            .buttonStyle(.plain)
-            
-            // Ratings for each criterion
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(criteria) { criterion in
-                        RatingCellView(
-                            option: option,
-                            criterion: criterion
-                        ) {
-                            onRatingTap(option, criterion)
-                        }
-                    }
+    private func getAverageRating(for option: Option) -> Double? {
+        guard !viewModel.criteria.isEmpty else { return nil }
+        
+        let ratingRepository = RatingRepository()
+        var totalRating: Double = 0
+        var count: Int = 0
+        
+        for criterion in viewModel.criteria {
+            do {
+                if let rating = try ratingRepository.fetch(for: option, criterion: criterion, userID: nil),
+                   rating.ratingValue > 0 {
+                    totalRating += Double(rating.ratingValue)
+                    count += 1
                 }
-                .padding(.horizontal, 8)
+            } catch {
+                // Ignore errors
             }
         }
-        .padding(.vertical, 8)
-        .background(Color(.systemGray6))
-        .cornerRadius(8)
+        
+        return count > 0 ? totalRating / Double(count) : nil
     }
 }
 
-struct RatingCellView: View {
-    let option: Option
-    let criterion: Criterion
-    let onTap: () -> Void
-    
-    @State private var currentRating: Int16 = 0
-    @Environment(\.managedObjectContext) private var viewContext
-    
-    var body: some View {
-        Button(action: onTap) {
-            VStack(spacing: 6) {
-                StarRatingView(
-                    rating: currentRating,
-                    maxRating: option.decision?.scoringScale ?? 5,
-                    interactive: false
-                )
-                Text(currentRating == 0 ? "Tap" : "\(currentRating)")
-                    .font(.caption)
-                    .foregroundColor(currentRating == 0 ? .secondary : .primary)
-                    .fontWeight(currentRating == 0 ? .regular : .semibold)
-            }
-            .frame(minWidth: 100, minHeight: 70)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .padding(.horizontal, 8)
-            .background(Color(.systemBackground))
-            .cornerRadius(8)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(currentRating == 0 ? Color(.systemGray4) : Color.blue.opacity(0.3), lineWidth: currentRating == 0 ? 1 : 2)
-            )
-        }
-        .buttonStyle(.plain)
-        .onAppear {
-            loadRating()
-            observeChanges()
-        }
-        .onChange(of: option.objectID) { _, _ in
-            loadRating()
-        }
-        .onChange(of: criterion.objectID) { _, _ in
-            loadRating()
-        }
-    }
-    
-    private func loadRating() {
-        let ratingRepository = RatingRepository(context: viewContext)
-        do {
-            if let rating = try ratingRepository.fetch(for: option, criterion: criterion, userID: nil) {
-                currentRating = rating.ratingValue
-            } else {
-                currentRating = 0
-            }
-        } catch {
-            currentRating = 0
-        }
-    }
-    
-    private func observeChanges() {
-        NotificationCenter.default.addObserver(
-            forName: .NSManagedObjectContextDidSave,
-            object: viewContext,
-            queue: .main
-        ) { _ in
-            Task { @MainActor in
-                loadRating()
-            }
-        }
-    }
-}
 
 struct RatingSheetView: View {
     let option: Option
