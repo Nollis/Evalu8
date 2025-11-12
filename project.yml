@@ -63,8 +63,7 @@ targets:
           UIApplicationSupportsMultipleScenes: false
           UISceneConfigurations:
             UIWindowSceneSessionRoleApplication:
-              UISceneConfigurationName: Default Configuration
-              UISceneDelegateClassName: $(PRODUCT_MODULE_NAME).SceneDelegate
+              - UISceneConfigurationName: Default Configuration
         UIApplicationSupportsIndirectInputEvents: YES
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
@@ -78,6 +77,8 @@ targets:
           - UIInterfaceOrientationLandscapeRight
         NSSpeechRecognitionUsageDescription: "We need speech recognition to convert your voice input into text for quick decision creation."
         NSMicrophoneUsageDescription: "We need microphone access to record your voice for quick decision creation."
+        UIBackgroundModes:
+          - remote-notification
     entitlements:
       path: Evalu8.entitlements
       properties:
@@ -99,6 +100,8 @@ targets:
       CloudKit:
         containers:
           - iCloud.com.nollis.evalu8
+      background-modes:
+        - remote-notification
 
   Evalu8Tests:
     type: bundle.unit-test
