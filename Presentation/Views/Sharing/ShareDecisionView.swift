@@ -11,6 +11,7 @@ struct ShareDecisionView: View {
     @State private var errorMessage: String?
     @State private var showingCloudSharingController = false
     @State private var cloudSharingController: UICloudSharingController?
+    @State private var cloudSharingDelegate: CloudSharingDelegate?
     
     private let shareService: ShareServiceProtocol
     
@@ -195,15 +196,29 @@ struct ShareDecisionView: View {
                 
                 await MainActor.run {
                     if let share = share {
-                        let controller = UICloudSharingController { controller, completionHandler in
-                            // Prepare share for sharing - completion handler expects container, not database
-                            completionHandler(share, container, nil)
-                        }
+                        // Create delegate and retain it
+                        let delegate = CloudSharingDelegate()
+                        cloudSharingDelegate = delegate
                         
-                        controller.delegate = CloudSharingDelegate()
-                        controller.availablePermissions = [.allowReadWrite, .allowPrivate]
-                        cloudSharingController = controller
-                        showingCloudSharingController = true
+                        // Use the modern API for iOS 17+
+                        if #available(iOS 17.0, *) {
+                            // For iOS 17+, we can use a simpler approach
+                            // Create controller with share directly
+                            let controller = UICloudSharingController(share: share, container: container)
+                            controller.delegate = delegate
+                            controller.availablePermissions = [.allowReadWrite, .allowPrivate]
+                            cloudSharingController = controller
+                            showingCloudSharingController = true
+                        } else {
+                            // Fallback for older versions (though we target iOS 17+)
+                            let controller = UICloudSharingController { controller, completionHandler in
+                                completionHandler(share, container, nil)
+                            }
+                            controller.delegate = delegate
+                            controller.availablePermissions = [.allowReadWrite, .allowPrivate]
+                            cloudSharingController = controller
+                            showingCloudSharingController = true
+                        }
                     } else {
                         errorMessage = "Could not load share"
                     }
