@@ -41,7 +41,7 @@ class DecisionListViewModel: ObservableObject {
         do {
             try decisionRepository.delete(decision)
             loadDecisions() // Reload to update the list
-            HapticManager.shared.impact(.medium)
+            HapticManager.impact(style: .medium)
         } catch {
             errorMessage = error.localizedDescription
             Logger.shared.log("Error deleting decision: \(error.localizedDescription)", level: .error)
@@ -56,7 +56,7 @@ class DecisionListViewModel: ObservableObject {
                 scoringScale: scoringScale
             )
             loadDecisions() // Reload to include the new decision
-            HapticManager.shared.notification(.success)
+            HapticManager.notification(type: .success)
         } catch {
             errorMessage = error.localizedDescription
             Logger.shared.log("Error creating decision: \(error.localizedDescription)", level: .error)
@@ -89,7 +89,7 @@ class DecisionListViewModel: ObservableObject {
             }
             
             loadDecisions() // Reload to include the new decision
-            HapticManager.shared.notification(.success)
+            HapticManager.notification(type: .success)
             Logger.shared.log("Created quick decision: \(setup.title) with \(setup.options.count) options and \(setup.criteria.count) criteria", level: .info)
         } catch {
             errorMessage = error.localizedDescription

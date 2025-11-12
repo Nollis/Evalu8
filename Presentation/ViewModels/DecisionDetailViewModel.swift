@@ -59,7 +59,7 @@ class DecisionDetailViewModel: ObservableObject {
         do {
             _ = try optionRepository.create(name: name, for: decision)
             loadData() // Reload to include the new option
-            HapticManager.shared.notification(.success)
+            HapticManager.notification(type: .success)
         } catch {
             errorMessage = error.localizedDescription
             Logger.shared.log("Error adding option: \(error.localizedDescription)", level: .error)
@@ -70,7 +70,7 @@ class DecisionDetailViewModel: ObservableObject {
         do {
             try optionRepository.delete(option)
             loadData() // Reload to update the list
-            HapticManager.shared.impact(.medium)
+            HapticManager.impact(style: .medium)
         } catch {
             errorMessage = error.localizedDescription
             Logger.shared.log("Error deleting option: \(error.localizedDescription)", level: .error)
@@ -86,7 +86,7 @@ class DecisionDetailViewModel: ObservableObject {
         do {
             _ = try criterionRepository.create(name: name, weight: weight, for: decision)
             loadData() // Reload to include the new criterion
-            HapticManager.shared.notification(.success)
+            HapticManager.notification(type: .success)
         } catch {
             errorMessage = error.localizedDescription
             Logger.shared.log("Error adding criterion: \(error.localizedDescription)", level: .error)
@@ -97,7 +97,7 @@ class DecisionDetailViewModel: ObservableObject {
         do {
             try criterionRepository.delete(criterion)
             loadData() // Reload to update the list
-            HapticManager.shared.impact(.medium)
+            HapticManager.impact(style: .medium)
         } catch {
             errorMessage = error.localizedDescription
             Logger.shared.log("Error deleting criterion: \(error.localizedDescription)", level: .error)
@@ -111,7 +111,7 @@ class DecisionDetailViewModel: ObservableObject {
         
         do {
             try decisionRepository.update(decision)
-            HapticManager.shared.notification(.success)
+            HapticManager.notification(type: .success)
         } catch {
             errorMessage = error.localizedDescription
             Logger.shared.log("Error updating decision: \(error.localizedDescription)", level: .error)
