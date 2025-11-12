@@ -140,3 +140,8 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
+# API Keys and Secrets
+*.apikey
+*.secret
+**/Info.plist.backup
+

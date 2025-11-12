@@ -3,11 +3,28 @@ import Foundation
 class AIService {
     static let shared = AIService()
     
+    private let openAIService = OpenAIService.shared
+    
     private init() {}
     
     /// Generates a complete decision setup from a natural language query
     /// Example: "I am planning on buying a putter. Can you give me some choices?"
+    /// Uses OpenAI API if available, otherwise falls back to local pattern matching
     func generateQuickDecision(from query: String) async throws -> QuickDecisionSetup {
+        // Try OpenAI first if available
+        if openAIService.isAvailable {
+            do {
+                Logger.shared.log("Using OpenAI API for decision generation", level: .info)
+                return try await openAIService.generateQuickDecision(from: query)
+            } catch {
+                Logger.shared.log("OpenAI API failed, falling back to local generation: \(error.localizedDescription)", level: .warning)
+                // Fall through to local generation
+            }
+        } else {
+            Logger.shared.log("OpenAI API not configured, using local generation", level: .info)
+        }
+        
+        // Fallback to local pattern-based generation
         // Simulate network delay
         try await Task.sleep(nanoseconds: 1_500_000_000)
         
