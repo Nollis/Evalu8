@@ -5,47 +5,33 @@ struct DecisionListView: View {
     @StateObject private var viewModel = DecisionListViewModel()
     @Environment(\.managedObjectContext) private var viewContext
     
-    init() {
-        Logger.shared.log("DecisionListView: Initializing", level: .info)
-    }
-    
     var body: some View {
         NavigationStack {
-            ZStack {
-                Color(.systemBackground)
-                    .ignoresSafeArea()
-                
-                Group {
-                    if viewModel.isLoading {
-                        VStack {
-                            ProgressView("Loading decisions...")
-                            Text("isLoading: true")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
+            Group {
+                if viewModel.isLoading {
+                    ProgressView("Loading decisions...")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else if viewModel.decisions.isEmpty {
-                        EmptyStateView(
-                            title: "No Decisions Yet",
-                            message: "Create your first decision to get started",
-                            actionTitle: "Add Decision",
-                            action: { viewModel.showingAddDecision = true }
-                        )
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else {
-                        List {
-                            ForEach(viewModel.decisions) { decision in
-                                NavigationLink {
-                                    DecisionDetailView(decision: decision)
-                                } label: {
-                                    DecisionRow(decision: decision)
-                                }
+                } else if viewModel.decisions.isEmpty {
+                    EmptyStateView(
+                        title: "No Decisions Yet",
+                        message: "Create your first decision to get started",
+                        actionTitle: "Add Decision",
+                        action: { viewModel.showingAddDecision = true }
+                    )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    List {
+                        ForEach(viewModel.decisions) { decision in
+                            NavigationLink {
+                                DecisionDetailView(decision: decision)
+                            } label: {
+                                DecisionRow(decision: decision)
                             }
-                            .onDelete(perform: deleteDecisions)
                         }
-                        .refreshable {
-                            viewModel.loadDecisions()
-                        }
+                        .onDelete(perform: deleteDecisions)
+                    }
+                    .refreshable {
+                        viewModel.loadDecisions()
                     }
                 }
             }
@@ -81,8 +67,6 @@ struct DecisionListView: View {
                 }
             }
             .onAppear {
-                Logger.shared.log("DecisionListView: onAppear called", level: .info)
-                Logger.shared.log("DecisionListView: isLoading=\(viewModel.isLoading), decisions.count=\(viewModel.decisions.count)", level: .info)
                 viewModel.loadDecisions()
             }
         }

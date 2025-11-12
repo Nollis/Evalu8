@@ -6,12 +6,13 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     var dataStore: DataStore!
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        print("✅ AppDelegate: didFinishLaunchingWithOptions called")
+        dataStore = DataStore.shared
         
-        // Don't initialize DataStore here - defer it
-        // This prevents blocking during app launch
+        // Ensure UUIDs for all existing decisions (defer to avoid blocking)
+        Task { @MainActor in
+            ensureUUIDsForExistingDecisions()
+        }
         
-        print("✅ AppDelegate: Returning true (DataStore will be initialized later)")
         return true
     }
     

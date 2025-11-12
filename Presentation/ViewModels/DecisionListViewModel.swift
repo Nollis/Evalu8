@@ -17,31 +17,25 @@ class DecisionListViewModel: ObservableObject {
         decisionRepository: DecisionRepositoryProtocol = DecisionRepository(),
         context: NSManagedObjectContext = DataStore.shared.container.viewContext
     ) {
-        Logger.shared.log("DecisionListViewModel: Initializing", level: .info)
         self.decisionRepository = decisionRepository
         self.context = context
-        Logger.shared.log("DecisionListViewModel: Context set, calling observeChanges", level: .info)
         observeChanges()
-        Logger.shared.log("DecisionListViewModel: Calling loadDecisions", level: .info)
         // Load decisions immediately on init
         loadDecisions()
-        Logger.shared.log("DecisionListViewModel: Initialization complete", level: .info)
     }
     
     func loadDecisions() {
-        Logger.shared.log("DecisionListViewModel: loadDecisions() called", level: .info)
         isLoading = true
         errorMessage = nil
         
         do {
             decisions = try decisionRepository.fetchAll()
             isLoading = false
-            Logger.shared.log("DecisionListViewModel: Loaded \(decisions.count) decisions", level: .info)
+            Logger.shared.log("Loaded \(decisions.count) decisions", level: .info)
         } catch {
             isLoading = false
             errorMessage = error.localizedDescription
-            Logger.shared.log("DecisionListViewModel: Error loading decisions: \(error.localizedDescription)", level: .error)
-            Logger.shared.log("DecisionListViewModel: Error details: \(error)", level: .error)
+            Logger.shared.log("Error loading decisions: \(error.localizedDescription)", level: .error)
         }
     }
     
