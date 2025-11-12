@@ -6,26 +6,12 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     var dataStore: DataStore!
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        print("AppDelegate: didFinishLaunchingWithOptions called")
-        Logger.shared.log("AppDelegate: didFinishLaunchingWithOptions called", level: .info)
+        print("✅ AppDelegate: didFinishLaunchingWithOptions called")
         
-        // Defer DataStore initialization to avoid blocking
-        Task { @MainActor in
-            print("AppDelegate: Creating DataStore.shared (async)")
-            do {
-                dataStore = DataStore.shared
-                print("AppDelegate: DataStore.shared created")
-                
-                // Ensure UUIDs for all existing decisions
-                print("AppDelegate: Calling ensureUUIDsForExistingDecisions")
-                ensureUUIDsForExistingDecisions()
-                print("AppDelegate: ensureUUIDsForExistingDecisions completed")
-            } catch {
-                print("AppDelegate: Error initializing DataStore: \(error)")
-            }
-        }
+        // Don't initialize DataStore here - defer it
+        // This prevents blocking during app launch
         
-        print("AppDelegate: Returning true")
+        print("✅ AppDelegate: Returning true (DataStore will be initialized later)")
         return true
     }
     

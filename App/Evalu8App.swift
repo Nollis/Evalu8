@@ -7,8 +7,10 @@ struct Evalu8App: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     init() {
-        print("Evalu8App: App initializing")
-        Logger.shared.log("Evalu8App: App initializing", level: .info)
+        print("✅ Evalu8App: App initializing")
+        print("✅ Evalu8App: This print statement should appear in console")
+        // Don't access Logger here - it might crash
+        // Logger.shared.log("Evalu8App: App initializing", level: .info)
     }
     
     var body: some Scene {
@@ -40,19 +42,16 @@ struct Evalu8App: App {
                     //     .environment(\.managedObjectContext, DataStore.shared.container.viewContext)
                 }
                 .onAppear {
-                    print("Evalu8App: WindowGroup appeared")
-                    Logger.shared.log("Evalu8App: WindowGroup appeared", level: .info)
+                    print("✅ Evalu8App: WindowGroup appeared")
+                    print("✅ Evalu8App: View should be visible now")
                 }
             }
             .task {
-                print("Evalu8App: Task started")
+                print("✅ Evalu8App: Task started")
                 // Try to access DataStore after view appears
-                do {
-                    let _ = DataStore.shared
-                    print("Evalu8App: DataStore.shared accessed successfully")
-                } catch {
-                    print("Evalu8App: Error accessing DataStore: \(error)")
-                }
+                print("✅ Evalu8App: About to access DataStore.shared")
+                let _ = DataStore.shared
+                print("✅ Evalu8App: DataStore.shared accessed successfully")
             }
         }
     }
