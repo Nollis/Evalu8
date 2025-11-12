@@ -5,6 +5,7 @@ struct DecisionChartsView: View {
     let decision: Decision
     @State private var chartData: [ChartDataPoint] = []
     @State private var isLoading = true
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         ScrollView {
@@ -99,6 +100,13 @@ struct DecisionChartsView: View {
         }
         .navigationTitle("Analytics")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Done") {
+                    dismiss()
+                }
+            }
+        }
         .onAppear {
             loadChartData()
         }
