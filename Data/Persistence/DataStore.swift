@@ -90,11 +90,12 @@ class DataStore {
             cloudKitSetupTimeoutTask.cancel()
             
             // Explicitly try to initialize/update the CloudKit schema (for development)
+            // Note: initializeCloudKitSchema() is synchronous but can take time, so run it in background
             if !DevelopmentConfig.bypassCloudKit {
-                Task {
+                Task.detached(priority: .utility) {
                     do {
                         Logger.shared.log("Attempting to initialize CloudKit schema...", level: .info)
-                        try await self.container.initializeCloudKitSchema()
+                        try self.container.initializeCloudKitSchema()
                         Logger.shared.log("CloudKit schema initialization attempt completed", level: .info)
                     } catch {
                         Logger.shared.log("Error initializing CloudKit schema: \(error.localizedDescription)", level: .error)
