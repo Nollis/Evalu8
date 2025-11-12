@@ -7,29 +7,36 @@ struct DecisionListView: View {
     
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.isLoading {
-                    ProgressView("Loading decisions...")
-                } else if viewModel.decisions.isEmpty {
-                    EmptyStateView(
-                        title: "No Decisions Yet",
-                        message: "Create your first decision to get started",
-                        actionTitle: "Add Decision",
-                        action: { viewModel.showingAddDecision = true }
-                    )
-                } else {
-                    List {
-                        ForEach(viewModel.decisions) { decision in
-                            NavigationLink {
-                                DecisionDetailView(decision: decision)
-                            } label: {
-                                DecisionRow(decision: decision)
+            ZStack {
+                Color(.systemBackground)
+                    .ignoresSafeArea()
+                
+                Group {
+                    if viewModel.isLoading {
+                        ProgressView("Loading decisions...")
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else if viewModel.decisions.isEmpty {
+                        EmptyStateView(
+                            title: "No Decisions Yet",
+                            message: "Create your first decision to get started",
+                            actionTitle: "Add Decision",
+                            action: { viewModel.showingAddDecision = true }
+                        )
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        List {
+                            ForEach(viewModel.decisions) { decision in
+                                NavigationLink {
+                                    DecisionDetailView(decision: decision)
+                                } label: {
+                                    DecisionRow(decision: decision)
+                                }
                             }
+                            .onDelete(perform: deleteDecisions)
                         }
-                        .onDelete(perform: deleteDecisions)
-                    }
-                    .refreshable {
-                        viewModel.loadDecisions()
+                        .refreshable {
+                            viewModel.loadDecisions()
+                        }
                     }
                 }
             }
