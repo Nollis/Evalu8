@@ -96,7 +96,7 @@ targets:
       - framework: CloudKit.framework
         embed: false
     capabilities:
-      - CloudKit
+      CloudKit:
         containers:
           - iCloud.com.nollis.evalu8
 
