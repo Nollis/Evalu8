@@ -180,12 +180,12 @@ struct ShareDecisionView: View {
     }
     
     private func showCloudSharingController() {
-        guard let shareRecordID = shareRecordID,
-              let recordID = try? CKRecord.ID(recordName: shareRecordID) else {
+        guard let shareRecordID = shareRecordID else {
             errorMessage = "Share record not available"
             return
         }
         
+        let recordID = CKRecord.ID(recordName: shareRecordID)
         let container = CKContainer(identifier: AppConstants.cloudKitContainerIdentifier)
         let database = container.privateCloudDatabase
         
@@ -196,8 +196,8 @@ struct ShareDecisionView: View {
                 await MainActor.run {
                     if let share = share {
                         let controller = UICloudSharingController { controller, completionHandler in
-                            // Prepare share for sharing
-                            completionHandler(share, database, nil)
+                            // Prepare share for sharing - completion handler expects container, not database
+                            completionHandler(share, container, nil)
                         }
                         
                         controller.delegate = CloudSharingDelegate()
