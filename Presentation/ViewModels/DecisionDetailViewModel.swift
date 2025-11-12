@@ -12,10 +12,13 @@ class DecisionDetailViewModel: ObservableObject {
     @Published var showingAddOption = false
     @Published var showingAddCriterion = false
     @Published var showingEditDecision = false
+    @Published var showingRatings = false
+    @Published var showingCharts = false
     
     private let optionRepository: OptionRepositoryProtocol
     private let criterionRepository: CriterionRepositoryProtocol
     private let decisionRepository: DecisionRepositoryProtocol
+    private let ratingRepository: RatingRepositoryProtocol
     private let context: NSManagedObjectContext
     
     init(
@@ -23,12 +26,14 @@ class DecisionDetailViewModel: ObservableObject {
         optionRepository: OptionRepositoryProtocol = OptionRepository(),
         criterionRepository: CriterionRepositoryProtocol = CriterionRepository(),
         decisionRepository: DecisionRepositoryProtocol = DecisionRepository(),
+        ratingRepository: RatingRepositoryProtocol = RatingRepository(),
         context: NSManagedObjectContext = DataStore.shared.container.viewContext
     ) {
         self.decision = decision
         self.optionRepository = optionRepository
         self.criterionRepository = criterionRepository
         self.decisionRepository = decisionRepository
+        self.ratingRepository = ratingRepository
         self.context = context
         loadData()
         observeChanges()

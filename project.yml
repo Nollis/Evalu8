@@ -96,6 +96,8 @@ targets:
         embed: false
       - framework: CloudKit.framework
         embed: false
+      - framework: Charts.framework
+        embed: false
     capabilities:
       CloudKit:
         containers:

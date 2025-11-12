@@ -85,7 +85,21 @@ struct DecisionDetailView: View {
         .navigationTitle(viewModel.decision.title ?? "Decision")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                if !viewModel.options.isEmpty && !viewModel.criteria.isEmpty {
+                    Button {
+                        viewModel.showingCharts = true
+                    } label: {
+                        Image(systemName: "chart.bar")
+                    }
+                    
+                    Button {
+                        viewModel.showingRatings = true
+                    } label: {
+                        Image(systemName: "star")
+                    }
+                }
+                
                 Button("Edit") {
                     viewModel.showingEditDecision = true
                 }
@@ -99,6 +113,16 @@ struct DecisionDetailView: View {
         }
         .sheet(isPresented: $viewModel.showingEditDecision) {
             EditDecisionView(viewModel: viewModel)
+        }
+        .sheet(isPresented: $viewModel.showingRatings) {
+            NavigationStack {
+                RatingsView(viewModel: viewModel)
+            }
+        }
+        .sheet(isPresented: $viewModel.showingCharts) {
+            NavigationStack {
+                DecisionChartsView(decision: viewModel.decision)
+            }
         }
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("OK") {
