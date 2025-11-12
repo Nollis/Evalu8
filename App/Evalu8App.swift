@@ -16,7 +16,7 @@ struct Evalu8App: App {
                 Color(.systemBackground)
                     .ignoresSafeArea()
                 
-                VStack {
+                VStack(spacing: 20) {
                     Text("App is Running!")
                         .font(.largeTitle)
                         .foregroundColor(.blue)
@@ -26,12 +26,21 @@ struct Evalu8App: App {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
-                    ContentView()
-                        .environment(\.managedObjectContext, DataStore.shared.container.viewContext)
-                        .onAppear {
-                            Logger.shared.log("Evalu8App: ContentView appeared", level: .info)
-                            print("Evalu8App: ContentView appeared (print)")
-                        }
+                    Button("Test Button") {
+                        print("Button tapped!")
+                    }
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    
+                    // Temporarily comment out ContentView to test
+                    // ContentView()
+                    //     .environment(\.managedObjectContext, DataStore.shared.container.viewContext)
+                }
+                .onAppear {
+                    print("Evalu8App: WindowGroup appeared")
+                    Logger.shared.log("Evalu8App: WindowGroup appeared", level: .info)
                 }
             }
         }

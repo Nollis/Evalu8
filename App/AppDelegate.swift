@@ -6,11 +6,19 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     var dataStore: DataStore!
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        print("AppDelegate: didFinishLaunchingWithOptions called")
+        Logger.shared.log("AppDelegate: didFinishLaunchingWithOptions called", level: .info)
+        
+        print("AppDelegate: Creating DataStore.shared")
         dataStore = DataStore.shared
+        print("AppDelegate: DataStore.shared created")
         
         // Ensure UUIDs for all existing decisions
+        print("AppDelegate: Calling ensureUUIDsForExistingDecisions")
         ensureUUIDsForExistingDecisions()
+        print("AppDelegate: ensureUUIDsForExistingDecisions completed")
         
+        print("AppDelegate: Returning true")
         return true
     }
     
