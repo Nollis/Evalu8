@@ -155,6 +155,8 @@ struct QuickDecisionView: View {
             .onChange(of: speechRecognizer.transcript) { _, newValue in
                 if !newValue.isEmpty && !speechRecognizer.isListening {
                     queryText = newValue
+                    // Dismiss keyboard when transcript is set after voice input completes
+                    isTextFieldFocused = false
                 }
             }
         }
@@ -167,11 +169,15 @@ struct QuickDecisionView: View {
     private func toggleVoiceInput() {
         if speechRecognizer.isListening {
             speechRecognizer.stopListening()
+            // Dismiss keyboard when stopping voice input
+            isTextFieldFocused = false
             // Use the transcript as the query text
             if !speechRecognizer.transcript.isEmpty {
                 queryText = speechRecognizer.transcript
             }
         } else {
+            // Dismiss keyboard when starting voice input
+            isTextFieldFocused = false
             speechRecognizer.startListening()
         }
     }
