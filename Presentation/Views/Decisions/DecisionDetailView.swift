@@ -53,9 +53,11 @@ struct DecisionDetailView: View {
                     )
                 } else {
                     ForEach(viewModel.options) { option in
-                        OptionRow(option: option) {
-                            viewModel.deleteOption(option)
-                        }
+                        OptionRow(
+                            option: option,
+                            onTap: { viewModel.selectedOption = option },
+                            onDelete: { viewModel.deleteOption(option) }
+                        )
                     }
                 }
                 
@@ -74,9 +76,11 @@ struct DecisionDetailView: View {
                     )
                 } else {
                     ForEach(viewModel.criteria) { criterion in
-                        CriterionRow(criterion: criterion) {
-                            viewModel.deleteCriterion(criterion)
-                        }
+                        CriterionRow(
+                            criterion: criterion,
+                            onTap: { viewModel.selectedCriterion = criterion },
+                            onDelete: { viewModel.deleteCriterion(criterion) }
+                        )
                     }
                 }
             }
@@ -133,6 +137,12 @@ struct DecisionDetailView: View {
         .sheet(isPresented: $viewModel.showingShare) {
             ShareDecisionView(viewModel: viewModel)
         }
+        .sheet(item: $viewModel.selectedOption) { option in
+            OptionDetailView(option: option)
+        }
+        .sheet(item: $viewModel.selectedCriterion) { criterion in
+            CriterionDetailView(criterion: criterion)
+        }
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("OK") {
                 viewModel.errorMessage = nil
@@ -183,6 +193,7 @@ struct SectionHeader: View {
 
 struct OptionRow: View {
     let option: Option
+    let onTap: () -> Void
     let onDelete: () -> Void
     
     var body: some View {
@@ -263,6 +274,7 @@ struct OptionRow: View {
                     .foregroundColor(.red.opacity(0.7))
                     .padding(8)
             }
+            .buttonStyle(.plain)
         }
         .padding()
         .background(
@@ -274,11 +286,16 @@ struct OptionRow: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.cardBorder.opacity(0.2), lineWidth: 1)
         )
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onTap()
+        }
     }
 }
 
 struct CriterionRow: View {
     let criterion: Criterion
+    let onTap: () -> Void
     let onDelete: () -> Void
     
     var body: some View {
@@ -319,6 +336,7 @@ struct CriterionRow: View {
                     .foregroundColor(.red.opacity(0.7))
                     .padding(8)
             }
+            .buttonStyle(.plain)
         }
         .padding()
         .background(
@@ -330,6 +348,10 @@ struct CriterionRow: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.cardBorder.opacity(0.2), lineWidth: 1)
         )
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onTap()
+        }
     }
 }
 
@@ -375,6 +397,185 @@ struct EmptySectionView: View {
                         .foregroundColor(Color.cardBorder.opacity(0.3))
                 )
         )
+    }
+}
+
+struct OptionDetailView: View {
+    let option: Option
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Image
+                    if let imageURLString = option.imageURL,
+                       !imageURLString.isEmpty,
+                       imageURLString != "null",
+                       let url = URL(string: imageURLString) {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .empty:
+                                ProgressView()
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 300)
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 300)
+                            case .failure(let error):
+                                Logger.shared.log("Failed to load image from \(imageURLString): \(error.localizedDescription)", level: .error)
+                                VStack(spacing: 12) {
+                                    Image(systemName: "photo")
+                                        .font(.system(size: 60))
+                                        .foregroundColor(.gray)
+                                    Text("Failed to load image")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 300)
+                            @unknown default:
+                                EmptyView()
+                            }
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.cardBorder.opacity(0.2), lineWidth: 1)
+                        )
+                    }
+                    
+                    // Name and Rating
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text(option.name ?? "Unnamed Option")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(Color.primaryText)
+                            
+                            Spacer()
+                            
+                            if option.internetRating > 0 {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "star.fill")
+                                        .foregroundColor(.yellow)
+                                        .font(.title3)
+                                    Text(String(format: "%.1f", option.internetRating))
+                                        .font(.title3)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(Color.primaryText)
+                                }
+                            }
+                        }
+                        
+                        // Description
+                        if let description = option.desc, !description.isEmpty {
+                            Text(description)
+                                .font(.body)
+                                .foregroundColor(Color.secondaryText)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.cardBackground)
+                            .shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 2)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.cardBorder.opacity(0.2), lineWidth: 1)
+                    )
+                }
+                .padding()
+            }
+            .navigationTitle("Option Details")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct CriterionDetailView: View {
+    let criterion: Criterion
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Weight Badge
+                    HStack {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.primaryGradientStart.opacity(0.2))
+                                .frame(width: 80, height: 80)
+                            
+                            VStack(spacing: 4) {
+                                Text("\(criterion.weight)")
+                                    .font(.system(size: 32, weight: .bold))
+                                    .foregroundStyle(Color.primaryGradient)
+                                Text("Weight")
+                                    .font(.caption)
+                                    .foregroundColor(Color.secondaryText)
+                            }
+                        }
+                        
+                        Spacer()
+                    }
+                    
+                    // Name and Description
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(criterion.name ?? "Unnamed Criterion")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(Color.primaryText)
+                        
+                        // Description
+                        if let description = criterion.desc, !description.isEmpty {
+                            Text(description)
+                                .font(.body)
+                                .foregroundColor(Color.secondaryText)
+                                .fixedSize(horizontal: false, vertical: true)
+                        } else {
+                            Text("No description available")
+                                .font(.body)
+                                .foregroundColor(Color.secondaryText.opacity(0.6))
+                                .italic()
+                        }
+                    }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.cardBackground)
+                            .shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 2)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.cardBorder.opacity(0.2), lineWidth: 1)
+                    )
+                }
+                .padding()
+            }
+            .navigationTitle("Criterion Details")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -15,6 +15,8 @@ class DecisionDetailViewModel: ObservableObject {
     @Published var showingRatings = false
     @Published var showingCharts = false
     @Published var showingShare = false
+    @Published var selectedOption: Option?
+    @Published var selectedCriterion: Criterion?
     
     private let optionRepository: OptionRepositoryProtocol
     private let criterionRepository: CriterionRepositoryProtocol
