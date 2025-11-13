@@ -8,17 +8,28 @@ struct DecisionListView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Group {
-                    if viewModel.isLoading {
-                        ProgressView("Loading decisions...")
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else if viewModel.decisions.isEmpty {
+            Group {
+                if viewModel.isLoading {
+                    ProgressView("Loading decisions...")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if viewModel.decisions.isEmpty {
+                    VStack(spacing: 20) {
                         EmptyStateView(
                             primaryAction: { viewModel.showingQuickDecision = true },
                             secondaryAction: { viewModel.showingAddDecision = true }
                         )
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else {
+                        
+                        // Debug: Show reload button
+                        Button(action: {
+                            viewModel.loadDecisions()
+                        }) {
+                            Text("Reload Decisions")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
                         List {
                             ForEach(viewModel.decisions) { decision in
                                 NavigationLink {
@@ -103,6 +114,10 @@ struct DecisionListView: View {
                 }
             }
             .onAppear {
+                viewModel.loadDecisions()
+            }
+            .task {
+                // Also load on task to ensure it happens
                 viewModel.loadDecisions()
             }
         }

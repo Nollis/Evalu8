@@ -29,9 +29,19 @@ class DecisionListViewModel: ObservableObject {
         errorMessage = nil
         
         do {
-            decisions = try decisionRepository.fetchAll()
+            let fetchedDecisions = try decisionRepository.fetchAll()
+            decisions = fetchedDecisions
             isLoading = false
             Logger.shared.log("Loaded \(decisions.count) decisions", level: .info)
+            
+            // Debug: Log decision details
+            if decisions.isEmpty {
+                Logger.shared.log("No decisions found in database", level: .warning)
+            } else {
+                for decision in decisions {
+                    Logger.shared.log("Decision: \(decision.title ?? "Untitled") (UUID: \(decision.uuid ?? "none"))", level: .info)
+                }
+            }
         } catch {
             isLoading = false
             errorMessage = error.localizedDescription
@@ -67,15 +77,21 @@ class DecisionListViewModel: ObservableObject {
     
     func createQuickDecision(setup: QuickDecisionSetup) {
         do {
-            // Create the decision
-            let decision = try decisionRepository.create(
+            // Ensure we're using the same context for all operations
+            let workingContext = context
+            
+            // Create the decision using a repository with the same context
+            let decisionRepo = DecisionRepository(context: workingContext)
+            let decision = try decisionRepo.create(
                 title: setup.title,
                 description: setup.description,
                 scoringScale: setup.scoringScale
             )
             
+            Logger.shared.log("Created decision: \(setup.title) with UUID: \(decision.uuid ?? "none")", level: .info)
+            
             // Add options
-            let optionRepository = OptionRepository(context: context)
+            let optionRepository = OptionRepository(context: workingContext)
             for optionSetup in setup.options {
                 _ = try optionRepository.create(
                     name: optionSetup.name,
@@ -87,7 +103,7 @@ class DecisionListViewModel: ObservableObject {
             }
             
             // Add criteria
-            let criterionRepository = CriterionRepository(context: context)
+            let criterionRepository = CriterionRepository(context: workingContext)
             for criterionSetup in setup.criteria {
                 _ = try criterionRepository.create(
                     name: criterionSetup.name,
@@ -97,7 +113,13 @@ class DecisionListViewModel: ObservableObject {
                 )
             }
             
-            loadDecisions() // Reload to include the new decision
+            // Ensure context is saved
+            try workingContext.save()
+            Logger.shared.log("Saved context after creating quick decision. Context has changes: \(workingContext.hasChanges)", level: .info)
+            
+            // Reload immediately
+            loadDecisions()
+            
             HapticManager.notification(type: .success)
             Logger.shared.log("Created quick decision: \(setup.title) with \(setup.options.count) options and \(setup.criteria.count) criteria", level: .info)
         } catch {
