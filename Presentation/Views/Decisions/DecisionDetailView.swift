@@ -213,10 +213,12 @@ struct OptionRow: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                     case .failure(let error):
-                        Logger.shared.log("Failed to load image from \(imageURLString): \(error.localizedDescription)", level: .error)
                         Image(systemName: "photo")
                             .foregroundColor(.gray)
                             .font(.system(size: 20))
+                            .onAppear {
+                                Logger.shared.log("Failed to load image from \(imageURLString): \(error.localizedDescription)", level: .error)
+                            }
                     @unknown default:
                         Image(systemName: "photo")
                             .foregroundColor(.gray)
@@ -426,7 +428,6 @@ struct OptionDetailView: View {
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 300)
                             case .failure(let error):
-                                Logger.shared.log("Failed to load image from \(imageURLString): \(error.localizedDescription)", level: .error)
                                 VStack(spacing: 12) {
                                     Image(systemName: "photo")
                                         .font(.system(size: 60))
@@ -437,6 +438,9 @@ struct OptionDetailView: View {
                                 }
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 300)
+                                .onAppear {
+                                    Logger.shared.log("Failed to load image from \(imageURLString): \(error.localizedDescription)", level: .error)
+                                }
                             @unknown default:
                                 EmptyView()
                             }
