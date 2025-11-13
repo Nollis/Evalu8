@@ -26,9 +26,14 @@ struct DecisionListView: View {
                                 } label: {
                                     DecisionRow(decision: decision)
                                 }
+                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
                             }
                             .onDelete(perform: deleteDecisions)
                         }
+                        .listStyle(.plain)
+                        .scrollContentBackground(.hidden)
                         .refreshable {
                             viewModel.loadDecisions()
                         }
@@ -63,6 +68,7 @@ struct DecisionListView: View {
                             .padding(.bottom, 20)
                         }
                     }
+                    .allowsHitTesting(true) // Ensure button is tappable
                 }
             }
             .navigationTitle("Decisions")
