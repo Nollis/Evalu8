@@ -45,7 +45,14 @@ class AIService {
         return QuickDecisionSetup(
             title: parsed.title,
             description: parsed.context,
-            options: options,
+            options: options.map { name in
+                QuickDecisionSetup.OptionSetup(
+                    name: name,
+                    description: nil,
+                    imageURL: nil,
+                    internetRating: nil
+                )
+            },
             criteria: criteria,
             scoringScale: 5
         )

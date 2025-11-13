@@ -53,23 +53,52 @@ class OpenAIService {
                     You are a helpful assistant that helps users make decisions by generating structured comparison data.
                     When given a query about comparing items, generate:
                     1. A clear title for the decision
-                    2. At least 2-5 relevant options to compare
-                    3. 3-6 relevant criteria with appropriate weights (1-5 scale, where 5 is most important)
+                    2. At least 2-5 relevant options to compare, each with:
+                       - A brief description (1-2 sentences)
+                       - An image URL if applicable (use Unsplash API format: https://source.unsplash.com/400x300/?[keyword] or provide a relevant product image URL)
+                       - An internet rating if available (0.0 to 5.0, based on common review sites or your knowledge)
+                    3. 3-6 relevant criteria with appropriate weights (1-5 scale, where 5 is most important) and brief descriptions
                     
                     Return ONLY valid JSON in this exact format:
                     {
                         "title": "Decision Title",
-                        "description": "Brief description",
-                        "options": ["Option 1", "Option 2", "Option 3"],
+                        "description": "Brief description of the decision",
+                        "options": [
+                            {
+                                "name": "Option 1",
+                                "description": "Brief description of this option",
+                                "imageURL": "https://example.com/image.jpg",
+                                "internetRating": 4.5
+                            },
+                            {
+                                "name": "Option 2",
+                                "description": "Brief description of this option",
+                                "imageURL": null,
+                                "internetRating": null
+                            }
+                        ],
                         "criteria": [
-                            {"name": "Criterion 1", "weight": 5},
-                            {"name": "Criterion 2", "weight": 4}
+                            {
+                                "name": "Criterion 1",
+                                "description": "Brief explanation of what this criterion measures",
+                                "weight": 5
+                            },
+                            {
+                                "name": "Criterion 2",
+                                "description": "Brief explanation of what this criterion measures",
+                                "weight": 4
+                            }
                         ],
                         "scoringScale": 5
                     }
                     
-                    Make criteria relevant to the decision type. For products, consider: Price, Quality, Features, Design, etc.
-                    For relationships or abstract concepts, be thoughtful and appropriate.
+                    Important:
+                    - For products: Include real product names, descriptions, and try to find actual ratings from review sites
+                    - For images: Use Unsplash URLs (https://source.unsplash.com/400x300/?[keyword]) or product image URLs when available
+                    - For ratings: Use actual ratings from Amazon, Google Reviews, or similar sources when possible. If unavailable, use null
+                    - For criteria descriptions: Explain what each criterion measures (e.g., "Price" -> "The cost and value for money")
+                    - Make criteria relevant to the decision type. For products, consider: Price, Quality, Features, Design, etc.
+                    - For relationships or abstract concepts, be thoughtful and appropriate.
                     """
                 ],
                 [
@@ -78,7 +107,7 @@ class OpenAIService {
                 ]
             ],
             "temperature": 0.7,
-            "max_tokens": 1000,
+            "max_tokens": 2000,
             "response_format": ["type": "json_object"] as [String: Any]
         ]
         
@@ -131,9 +160,33 @@ class OpenAIService {
         let description = json["description"] as? String
         let scoringScale = (json["scoringScale"] as? Int) ?? 5
         
-        guard let optionsArray = json["options"] as? [String],
+        guard let optionsArray = json["options"] as? [[String: Any]],
               optionsArray.count >= 2 else {
             throw AIError.invalidResponseFormat
+        }
+        
+        let options = try optionsArray.map { optionDict -> QuickDecisionSetup.OptionSetup in
+            guard let name = optionDict["name"] as? String else {
+                throw AIError.invalidResponseFormat
+            }
+            let description = optionDict["description"] as? String
+            let imageURL = optionDict["imageURL"] as? String
+            let internetRating = optionDict["internetRating"] as? Double
+            
+            // Validate rating is between 0.0 and 5.0
+            let validatedRating: Double?
+            if let rating = internetRating {
+                validatedRating = max(0.0, min(5.0, rating))
+            } else {
+                validatedRating = nil
+            }
+            
+            return QuickDecisionSetup.OptionSetup(
+                name: name,
+                description: description,
+                imageURL: imageURL,
+                internetRating: validatedRating
+            )
         }
         
         guard let criteriaArray = json["criteria"] as? [[String: Any]],
@@ -146,8 +199,10 @@ class OpenAIService {
                   let weight = criterionDict["weight"] as? Int else {
                 throw AIError.invalidResponseFormat
             }
+            let description = criterionDict["description"] as? String
             return QuickDecisionSetup.CriterionSetup(
                 name: name,
+                description: description,
                 weight: Int16(max(1, min(5, weight))) // Clamp between 1-5
             )
         }
@@ -155,7 +210,7 @@ class OpenAIService {
         return QuickDecisionSetup(
             title: title,
             description: description,
-            options: optionsArray,
+            options: options,
             criteria: criteria,
             scoringScale: Int16(scoringScale)
         )

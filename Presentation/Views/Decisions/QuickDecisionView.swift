@@ -197,40 +197,176 @@ struct QuickDecisionView: View {
     }
     
     private func previewSection(setup: QuickDecisionSetup) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Preview")
                 .font(.headline)
+                .foregroundColor(Color.primaryText)
             
+            // Decision Info
             VStack(alignment: .leading, spacing: 8) {
-                Text("Title: \(setup.title)")
-                    .font(.subheadline)
+                Text(setup.title)
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .foregroundColor(Color.primaryText)
                 
                 if let desc = setup.description {
-                    Text("Description: \(desc)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    Text(desc)
+                        .font(.subheadline)
+                        .foregroundColor(Color.secondaryText)
                 }
-                
-                Text("Options: \(setup.options.count)")
-                    .font(.caption)
-                
-                Text("Criteria: \(setup.criteria.count)")
-                    .font(.caption)
             }
             .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.cardBackground)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.cardBorder, lineWidth: 1)
+            )
+            
+            // Options Preview
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Options (\(setup.options.count))")
+                    .font(.headline)
+                    .foregroundColor(Color.primaryText)
+                
+                ForEach(Array(setup.options.enumerated()), id: \.offset) { index, option in
+                    optionPreviewCard(option: option)
+                }
+            }
+            
+            // Criteria Preview
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Criteria (\(setup.criteria.count))")
+                    .font(.headline)
+                    .foregroundColor(Color.primaryText)
+                
+                ForEach(Array(setup.criteria.enumerated()), id: \.offset) { index, criterion in
+                    criterionPreviewCard(criterion: criterion)
+                }
+            }
             
             Button(action: createDecision) {
                 Text("Create Decision")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.green)
+                    .background(Color.primaryGradient)
                     .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .fontWeight(.semibold)
+                    .cornerRadius(12)
+                    .shadow(color: Color.primaryGradientStart.opacity(0.3), radius: 8, x: 0, y: 4)
             }
         }
         .padding(.horizontal)
+    }
+    
+    @ViewBuilder
+    private func optionPreviewCard(option: QuickDecisionSetup.OptionSetup) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            // Image
+            if let imageURL = option.imageURL, let url = URL(string: imageURL) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        ProgressView()
+                            .frame(width: 60, height: 60)
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    case .failure:
+                        Image(systemName: "photo")
+                            .foregroundColor(.gray)
+                    @unknown default:
+                        EmptyView()
+                    }
+                }
+                .frame(width: 60, height: 60)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            } else {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(.systemGray5))
+                    .frame(width: 60, height: 60)
+                    .overlay(
+                        Image(systemName: "photo")
+                            .foregroundColor(.gray)
+                    )
+            }
+            
+            // Details
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(option.name)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color.primaryText)
+                    
+                    Spacer()
+                    
+                    if let rating = option.internetRating {
+                        HStack(spacing: 2) {
+                            Image(systemName: "star.fill")
+                                .foregroundColor(.yellow)
+                                .font(.caption)
+                            Text(String(format: "%.1f", rating))
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(Color.primaryText)
+                        }
+                    }
+                }
+                
+                if let description = option.description {
+                    Text(description)
+                        .font(.caption)
+                        .foregroundColor(Color.secondaryText)
+                        .lineLimit(2)
+                }
+            }
+        }
+        .padding()
+        .background(Color.cardBackground)
+        .cornerRadius(10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color.cardBorder, lineWidth: 1)
+        )
+    }
+    
+    @ViewBuilder
+    private func criterionPreviewCard(criterion: QuickDecisionSetup.CriterionSetup) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(criterion.name)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(Color.primaryText)
+                
+                Spacer()
+                
+                Text("Weight: \(criterion.weight)")
+                    .font(.caption)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.primaryGradientStart.opacity(0.2))
+                    .foregroundColor(Color.primaryText)
+                    .cornerRadius(6)
+            }
+            
+            if let description = criterion.description {
+                Text(description)
+                    .font(.caption)
+                    .foregroundColor(Color.secondaryText)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.cardBackground)
+        .cornerRadius(10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color.cardBorder, lineWidth: 1)
+        )
     }
     
     private var canGenerate: Bool {

@@ -5,6 +5,7 @@ protocol OptionRepositoryProtocol {
     func fetchAll(for decision: Decision) throws -> [Option]
     func fetch(byID objectID: NSManagedObjectID) throws -> Option?
     func create(name: String, for decision: Decision) throws -> Option
+    func create(name: String, description: String?, imageURL: String?, internetRating: Double?, for decision: Decision) throws -> Option
     func update(_ option: Option) throws
     func delete(_ option: Option) throws
     func save() throws
@@ -29,12 +30,21 @@ class OptionRepository: OptionRepositoryProtocol {
     }
     
     func create(name: String, for decision: Decision) throws -> Option {
+        return try create(name: name, description: nil, imageURL: nil, internetRating: nil, for: decision)
+    }
+    
+    func create(name: String, description: String?, imageURL: String?, internetRating: Double?, for decision: Decision) throws -> Option {
         guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw AppError.invalidInput(field: "name")
         }
         
         let option = Option(context: context)
         option.name = name
+        option.desc = description
+        option.imageURL = imageURL
+        if let rating = internetRating {
+            option.internetRating = max(0.0, min(5.0, rating)) // Clamp between 0.0 and 5.0
+        }
         option.decision = decision
         option.dateCreated = Date()
         

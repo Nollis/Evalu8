@@ -5,6 +5,7 @@ protocol CriterionRepositoryProtocol {
     func fetchAll(for decision: Decision) throws -> [Criterion]
     func fetch(byID objectID: NSManagedObjectID) throws -> Criterion?
     func create(name: String, weight: Int16, for decision: Decision) throws -> Criterion
+    func create(name: String, description: String?, weight: Int16, for decision: Decision) throws -> Criterion
     func update(_ criterion: Criterion) throws
     func delete(_ criterion: Criterion) throws
     func save() throws
@@ -29,12 +30,17 @@ class CriterionRepository: CriterionRepositoryProtocol {
     }
     
     func create(name: String, weight: Int16, for decision: Decision) throws -> Criterion {
+        return try create(name: name, description: nil, weight: weight, for: decision)
+    }
+    
+    func create(name: String, description: String?, weight: Int16, for decision: Decision) throws -> Criterion {
         guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw AppError.invalidInput(field: "name")
         }
         
         let criterion = Criterion(context: context)
         criterion.name = name
+        criterion.desc = description
         criterion.weight = weight
         criterion.decision = decision
         criterion.dateCreated = Date()

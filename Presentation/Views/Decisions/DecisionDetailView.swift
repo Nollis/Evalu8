@@ -186,17 +186,69 @@ struct OptionRow: View {
     let onDelete: () -> Void
     
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "circle.fill")
-                .font(.system(size: 8))
-                .foregroundStyle(Color.primaryGradientStart)
+        HStack(alignment: .top, spacing: 12) {
+            // Image or icon
+            if let imageURL = option.imageURL, let url = URL(string: imageURL) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        ProgressView()
+                            .frame(width: 50, height: 50)
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    case .failure:
+                        Image(systemName: "circle.fill")
+                            .font(.system(size: 8))
+                            .foregroundStyle(Color.primaryGradientStart)
+                    @unknown default:
+                        Image(systemName: "circle.fill")
+                            .font(.system(size: 8))
+                            .foregroundStyle(Color.primaryGradientStart)
+                    }
+                }
+                .frame(width: 50, height: 50)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            } else {
+                Image(systemName: "circle.fill")
+                    .font(.system(size: 8))
+                    .foregroundStyle(Color.primaryGradientStart)
+                    .frame(width: 50, height: 50)
+            }
             
-            Text(option.name ?? "Unnamed Option")
-                .font(.body)
-                .foregroundColor(Color.primaryText)
+            // Details
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(option.name ?? "Unnamed Option")
+                        .font(.body)
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color.primaryText)
+                    
+                    Spacer()
+                    
+                    if option.internetRating > 0 {
+                        HStack(spacing: 2) {
+                            Image(systemName: "star.fill")
+                                .foregroundColor(.yellow)
+                                .font(.caption)
+                            Text(String(format: "%.1f", option.internetRating))
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(Color.primaryText)
+                        }
+                    }
+                }
+                
+                if let description = option.desc, !description.isEmpty {
+                    Text(description)
+                        .font(.caption)
+                        .foregroundColor(Color.secondaryText)
+                        .lineLimit(2)
+                }
+            }
             
-            Spacer()
-            
+            // Delete button
             Button(action: onDelete) {
                 Image(systemName: "trash")
                     .font(.system(size: 16))
@@ -236,11 +288,19 @@ struct CriterionRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(criterion.name ?? "Unnamed Criterion")
                     .font(.body)
+                    .fontWeight(.semibold)
                     .foregroundColor(Color.primaryText)
                 
-                Text("Weight: \(criterion.weight)")
-                    .font(.caption)
-                    .foregroundColor(Color.secondaryText)
+                if let description = criterion.desc, !description.isEmpty {
+                    Text(description)
+                        .font(.caption)
+                        .foregroundColor(Color.secondaryText)
+                        .lineLimit(2)
+                } else {
+                    Text("Weight: \(criterion.weight)")
+                        .font(.caption)
+                        .foregroundColor(Color.secondaryText)
+                }
             }
             
             Spacer()

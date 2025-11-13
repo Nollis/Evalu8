@@ -76,8 +76,14 @@ class DecisionListViewModel: ObservableObject {
             
             // Add options
             let optionRepository = OptionRepository(context: context)
-            for optionName in setup.options {
-                _ = try optionRepository.create(name: optionName, for: decision)
+            for optionSetup in setup.options {
+                _ = try optionRepository.create(
+                    name: optionSetup.name,
+                    description: optionSetup.description,
+                    imageURL: optionSetup.imageURL,
+                    internetRating: optionSetup.internetRating,
+                    for: decision
+                )
             }
             
             // Add criteria
@@ -85,6 +91,7 @@ class DecisionListViewModel: ObservableObject {
             for criterionSetup in setup.criteria {
                 _ = try criterionRepository.create(
                     name: criterionSetup.name,
+                    description: criterionSetup.description,
                     weight: criterionSetup.weight,
                     for: decision
                 )
