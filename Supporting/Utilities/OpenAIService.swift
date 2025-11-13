@@ -102,7 +102,11 @@ class OpenAIService {
                     
                     Important:
                     - For products: Include real product names, descriptions, and try to find actual ratings from review sites
-                    - For images: Use Unsplash URLs (https://source.unsplash.com/400x300/?[keyword]) or product image URLs when available
+                    - For images: Use direct image URLs from reliable sources. Prefer:
+                      * Unsplash direct image URLs: https://images.unsplash.com/photo-[id]?w=400 (if you know specific photo IDs)
+                      * Product image URLs from manufacturer websites or Amazon
+                      * Generic placeholder services: https://via.placeholder.com/400x300?text=[keyword]
+                      * If no suitable image URL is available, use null
                     - For ratings: Use actual ratings from Amazon, Google Reviews, or similar sources when possible. If unavailable, use null
                     - For criteria descriptions: Explain what each criterion measures (e.g., "Price" -> "The cost and value for money")
                     - Make criteria relevant to the decision type. For products, consider: Price, Quality, Features, Design, etc.

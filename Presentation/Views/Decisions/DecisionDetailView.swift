@@ -201,7 +201,8 @@ struct OptionRow: View {
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                    case .failure:
+                    case .failure(let error):
+                        Logger.shared.log("Failed to load image from \(imageURLString): \(error.localizedDescription)", level: .error)
                         Image(systemName: "photo")
                             .foregroundColor(.gray)
                             .font(.system(size: 20))
