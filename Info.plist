@@ -62,6 +62,11 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<!-- 
+		OpenAI API Key Configuration:
+		Option 1 (Recommended): Set OPENAI_API_KEY environment variable in Xcode scheme
+		Option 2: Set OpenAIAPIKey here (not recommended - will be overwritten on git pull)
+	-->
 	<key>OpenAIAPIKey</key>
 	<string>YOUR_OPENAI_API_KEY_HERE</string>
 </dict>

@@ -13,22 +13,42 @@ The Evalu8 app can use OpenAI's API to generate intelligent decision setups from
 
 ## Setup Instructions
 
-### Option 1: Environment Variable (Recommended for Development)
+### ⚠️ Important: Git Pull Issue
 
-1. Set the `OPENAI_API_KEY` environment variable in Xcode:
-   - Product → Scheme → Edit Scheme
-   - Run → Arguments → Environment Variables
-   - Add: `OPENAI_API_KEY` = `your-api-key-here`
+**If you put your API key in `Info.plist`, it will be overwritten every time you pull from git!**
 
-### Option 2: Info.plist (For Testing)
+The `Info.plist` file is tracked in git, so any changes you make locally will be lost when you pull updates.
 
-1. Add to `Info.plist`:
-```xml
-<key>OpenAIAPIKey</key>
-<string>your-api-key-here</string>
-```
+### Option 1: Environment Variable (✅ Recommended - Won't be lost on git pull)
 
-**Note**: This is NOT secure for production. Use environment variables or a secure key management service.
+**This is the recommended approach** because:
+- ✅ Your API key won't be overwritten on git pull
+- ✅ Each developer can use their own key
+- ✅ More secure (not committed to git)
+
+**Steps:**
+1. Open Xcode
+2. Click on the **Evalu8** scheme dropdown (next to the play/stop buttons)
+3. Select **Edit Scheme...**
+4. In the left sidebar, select **Run**
+5. Click the **Arguments** tab
+6. Under **Environment Variables**, click the **+** button
+7. Add:
+   - **Name**: `OPENAI_API_KEY`
+   - **Value**: `your-actual-api-key-here`
+8. Click **Close**
+
+**To find Info.plist in Xcode:**
+- In the Project Navigator (left sidebar), look for `Info.plist` at the root level
+- Or: Select the **Evalu8** target → **Info** tab → Custom iOS Target Properties
+
+### Option 2: Info.plist (⚠️ Not Recommended - Will be lost on git pull)
+
+1. Open `Info.plist` in Xcode (see above for location)
+2. Find the `OpenAIAPIKey` key (it should have `YOUR_OPENAI_API_KEY_HERE` as value)
+3. Replace `YOUR_OPENAI_API_KEY_HERE` with your actual API key
+
+**Warning**: This value will be overwritten every time you run `git pull`!
 
 ### Option 3: Secure Key Storage (Production)
 
