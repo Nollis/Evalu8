@@ -266,69 +266,69 @@ class AIService {
         // Product-specific criteria with automatic weighting
         if type.contains("putter") || desc.contains("putter") || desc.contains("golf putter") {
             criteria = [
-                QuickDecisionSetup.CriterionSetup(name: "Price", weight: 4),
-                QuickDecisionSetup.CriterionSetup(name: "Look", weight: 3),
-                QuickDecisionSetup.CriterionSetup(name: "Feel", weight: 5),
-                QuickDecisionSetup.CriterionSetup(name: "Balance", weight: 4),
-                QuickDecisionSetup.CriterionSetup(name: "Brand", weight: 3)
+                QuickDecisionSetup.CriterionSetup(name: "Price", description: nil, weight: 4),
+                QuickDecisionSetup.CriterionSetup(name: "Look", description: nil, weight: 3),
+                QuickDecisionSetup.CriterionSetup(name: "Feel", description: nil, weight: 5),
+                QuickDecisionSetup.CriterionSetup(name: "Balance", description: nil, weight: 4),
+                QuickDecisionSetup.CriterionSetup(name: "Brand", description: nil, weight: 3)
             ]
         } else if type.contains("car") || type.contains("vehicle") {
             criteria = [
-                QuickDecisionSetup.CriterionSetup(name: "Price", weight: 5),
-                QuickDecisionSetup.CriterionSetup(name: "Fuel Efficiency", weight: 4),
-                QuickDecisionSetup.CriterionSetup(name: "Safety Features", weight: 5),
-                QuickDecisionSetup.CriterionSetup(name: "Reliability", weight: 5),
-                QuickDecisionSetup.CriterionSetup(name: "Resale Value", weight: 3)
+                QuickDecisionSetup.CriterionSetup(name: "Price", description: nil, weight: 5),
+                QuickDecisionSetup.CriterionSetup(name: "Fuel Efficiency", description: nil, weight: 4),
+                QuickDecisionSetup.CriterionSetup(name: "Safety Features", description: nil, weight: 5),
+                QuickDecisionSetup.CriterionSetup(name: "Reliability", description: nil, weight: 5),
+                QuickDecisionSetup.CriterionSetup(name: "Resale Value", description: nil, weight: 3)
             ]
         } else if type.contains("phone") || type.contains("smartphone") {
             criteria = [
-                QuickDecisionSetup.CriterionSetup(name: "Price", weight: 4),
-                QuickDecisionSetup.CriterionSetup(name: "Camera Quality", weight: 5),
-                QuickDecisionSetup.CriterionSetup(name: "Battery Life", weight: 5),
-                QuickDecisionSetup.CriterionSetup(name: "Performance", weight: 4),
-                QuickDecisionSetup.CriterionSetup(name: "Design", weight: 3)
+                QuickDecisionSetup.CriterionSetup(name: "Price", description: nil, weight: 4),
+                QuickDecisionSetup.CriterionSetup(name: "Camera Quality", description: nil, weight: 5),
+                QuickDecisionSetup.CriterionSetup(name: "Battery Life", description: nil, weight: 5),
+                QuickDecisionSetup.CriterionSetup(name: "Performance", description: nil, weight: 4),
+                QuickDecisionSetup.CriterionSetup(name: "Design", description: nil, weight: 3)
             ]
         } else if type.contains("laptop") {
             criteria = [
-                QuickDecisionSetup.CriterionSetup(name: "Price", weight: 4),
-                QuickDecisionSetup.CriterionSetup(name: "Performance", weight: 5),
-                QuickDecisionSetup.CriterionSetup(name: "Battery Life", weight: 4),
-                QuickDecisionSetup.CriterionSetup(name: "Portability", weight: 4),
-                QuickDecisionSetup.CriterionSetup(name: "Build Quality", weight: 4)
+                QuickDecisionSetup.CriterionSetup(name: "Price", description: nil, weight: 4),
+                QuickDecisionSetup.CriterionSetup(name: "Performance", description: nil, weight: 5),
+                QuickDecisionSetup.CriterionSetup(name: "Battery Life", description: nil, weight: 4),
+                QuickDecisionSetup.CriterionSetup(name: "Portability", description: nil, weight: 4),
+                QuickDecisionSetup.CriterionSetup(name: "Build Quality", description: nil, weight: 4)
             ]
         } else {
             // Generic criteria - always generate at least 3-4 relevant criteria
             criteria = [
-                QuickDecisionSetup.CriterionSetup(name: "Price", weight: 4),
-                QuickDecisionSetup.CriterionSetup(name: "Quality", weight: 5),
-                QuickDecisionSetup.CriterionSetup(name: "Features", weight: 4),
-                QuickDecisionSetup.CriterionSetup(name: "Reputation", weight: 3),
-                QuickDecisionSetup.CriterionSetup(name: "Value for Money", weight: 4)
+                QuickDecisionSetup.CriterionSetup(name: "Price", description: nil, weight: 4),
+                QuickDecisionSetup.CriterionSetup(name: "Quality", description: nil, weight: 5),
+                QuickDecisionSetup.CriterionSetup(name: "Features", description: nil, weight: 4),
+                QuickDecisionSetup.CriterionSetup(name: "Reputation", description: nil, weight: 3),
+                QuickDecisionSetup.CriterionSetup(name: "Value for Money", description: nil, weight: 4)
             ]
         }
         
         // Adjust weights based on description keywords for better context understanding
         if desc.contains("budget") || desc.contains("cheap") || desc.contains("affordable") {
             if let index = criteria.firstIndex(where: { $0.name.lowercased().contains("price") }) {
-                criteria[index] = QuickDecisionSetup.CriterionSetup(name: criteria[index].name, weight: 6)
+                criteria[index] = QuickDecisionSetup.CriterionSetup(name: criteria[index].name, description: criteria[index].description, weight: 6)
             }
         }
         
         if desc.contains("quality") || desc.contains("premium") || desc.contains("luxury") {
             if let index = criteria.firstIndex(where: { $0.name.lowercased().contains("quality") }) {
-                criteria[index] = QuickDecisionSetup.CriterionSetup(name: criteria[index].name, weight: 6)
+                criteria[index] = QuickDecisionSetup.CriterionSetup(name: criteria[index].name, description: criteria[index].description, weight: 6)
             }
         }
         
         if desc.contains("performance") || desc.contains("speed") {
             if let index = criteria.firstIndex(where: { $0.name.lowercased().contains("performance") || $0.name.lowercased().contains("features") }) {
-                criteria[index] = QuickDecisionSetup.CriterionSetup(name: criteria[index].name, weight: 6)
+                criteria[index] = QuickDecisionSetup.CriterionSetup(name: criteria[index].name, description: criteria[index].description, weight: 6)
             }
         }
         
         // Ensure we have at least 2 criteria
         if criteria.count < 2 {
-            criteria.append(QuickDecisionSetup.CriterionSetup(name: "Overall Value", weight: 4))
+            criteria.append(QuickDecisionSetup.CriterionSetup(name: "Overall Value", description: nil, weight: 4))
         }
         
         return criteria
