@@ -7,48 +7,76 @@ struct DecisionListView: View {
     
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.isLoading {
-                    ProgressView("Loading decisions...")
+            ZStack {
+                Group {
+                    if viewModel.isLoading {
+                        ProgressView("Loading decisions...")
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else if viewModel.decisions.isEmpty {
+                        EmptyStateView(
+                            primaryAction: { viewModel.showingQuickDecision = true },
+                            secondaryAction: { viewModel.showingAddDecision = true }
+                        )
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if viewModel.decisions.isEmpty {
-                    EmptyStateView(
-                        title: "No Decisions Yet",
-                        message: "Create your first decision to get started",
-                        actionTitle: "Add Decision",
-                        action: { viewModel.showingAddDecision = true }
-                    )
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    List {
-                        ForEach(viewModel.decisions) { decision in
-                            NavigationLink {
-                                DecisionDetailView(decision: decision)
-                            } label: {
-                                DecisionRow(decision: decision)
+                    } else {
+                        List {
+                            ForEach(viewModel.decisions) { decision in
+                                NavigationLink {
+                                    DecisionDetailView(decision: decision)
+                                } label: {
+                                    DecisionRow(decision: decision)
+                                }
                             }
+                            .onDelete(perform: deleteDecisions)
                         }
-                        .onDelete(perform: deleteDecisions)
+                        .refreshable {
+                            viewModel.loadDecisions()
+                        }
                     }
-                    .refreshable {
-                        viewModel.loadDecisions()
+                }
+                
+                // Floating Action Button for Quick Decision (only show when there are decisions)
+                if !viewModel.decisions.isEmpty {
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                viewModel.showingQuickDecision = true
+                            }) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "sparkles")
+                                        .font(.system(size: 18, weight: .semibold))
+                                    Text("Quick Decision")
+                                        .fontWeight(.semibold)
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 14)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 28)
+                                        .fill(Color.primaryGradient)
+                                        .shadow(color: Color.primaryGradientStart.opacity(0.4), radius: 12, x: 0, y: 6)
+                                )
+                            }
+                            .padding(.trailing, 20)
+                            .padding(.bottom, 20)
+                        }
                     }
                 }
             }
             .navigationTitle("Decisions")
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        viewModel.showingQuickDecision = true
-                    }) {
-                        Image(systemName: "sparkles")
-                            .foregroundStyle(Color.primaryGradient)
-                    }
-                    
-                    Button(action: {
-                        viewModel.showingAddDecision = true
-                    }) {
-                        Image(systemName: "plus")
+                    // Menu for secondary actions
+                    Menu {
+                        Button(action: {
+                            viewModel.showingAddDecision = true
+                        }) {
+                            Label("Create Manually", systemImage: "plus")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
                             .foregroundStyle(Color.primaryGradient)
                     }
                 }
@@ -158,51 +186,77 @@ struct DecisionRow: View {
 }
 
 struct EmptyStateView: View {
-    let title: String
-    let message: String
-    let actionTitle: String
-    let action: () -> Void
+    let primaryAction: () -> Void
+    let secondaryAction: () -> Void
     
     var body: some View {
-        VStack(spacing: 24) {
-                ZStack {
-                    Circle()
-                        .fill(Color.primaryGradientStart.opacity(0.1))
-                        .frame(width: 120, height: 120)
-                    
-                    Image(systemName: "tray")
-                        .font(.system(size: 50))
-                        .foregroundStyle(Color.primaryGradient)
-                }
+        VStack(spacing: 32) {
+            // Hero icon
+            ZStack {
+                Circle()
+                    .fill(Color.primaryGradientStart.opacity(0.15))
+                    .frame(width: 140, height: 140)
+                
+                Image(systemName: "sparkles")
+                    .font(.system(size: 60))
+                    .foregroundStyle(Color.primaryGradient)
+            }
             
-            VStack(spacing: 8) {
-                Text(title)
-                    .font(.title2)
+            VStack(spacing: 12) {
+                Text("Create Your First Decision")
+                    .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(.primaryText)
                 
-                Text(message)
+                Text("Describe what you're deciding on, and AI will set it up for you with options, criteria, and ratings")
                     .font(.body)
                     .foregroundColor(.secondaryText)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, 40)
+                    .lineSpacing(4)
             }
             
-            Button(action: action) {
-                HStack(spacing: 8) {
-                    Image(systemName: "plus.circle.fill")
-                    Text(actionTitle)
+            VStack(spacing: 16) {
+                // Primary CTA - Quick Decision
+                Button(action: primaryAction) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 18, weight: .semibold))
+                        Text("Create with AI")
+                            .fontWeight(.semibold)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.primaryGradient)
+                    )
+                    .shadow(color: Color.primaryGradientStart.opacity(0.4), radius: 12, x: 0, y: 6)
                 }
-                .font(.headline)
-                .foregroundColor(.white)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 14)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.primaryGradient)
-                )
-                .shadow(color: Color.primaryGradientStart.opacity(0.3), radius: 8, x: 0, y: 4)
+                
+                // Secondary CTA - Manual creation
+                Button(action: secondaryAction) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus.circle")
+                            .font(.system(size: 16))
+                        Text("Create Manually")
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(.primaryText)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.cardBackground)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color.cardBorder, lineWidth: 1.5)
+                            )
+                    )
+                }
             }
+            .padding(.horizontal, 32)
         }
     }
 }
