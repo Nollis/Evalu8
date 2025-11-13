@@ -178,8 +178,19 @@ class OpenAIService {
                 throw AIError.invalidResponseFormat
             }
             let description = optionDict["description"] as? String
-            let imageURL = optionDict["imageURL"] as? String
+            var imageURL = optionDict["imageURL"] as? String
+            // Filter out null strings and empty strings
+            if imageURL == "null" || imageURL?.isEmpty == true {
+                imageURL = nil
+            }
             let internetRating = optionDict["internetRating"] as? Double
+            
+            // Log image URL for debugging
+            if let url = imageURL {
+                Logger.shared.log("Option '\(name)' has image URL: \(url)", level: .info)
+            } else {
+                Logger.shared.log("Option '\(name)' has no image URL", level: .info)
+            }
             
             // Validate rating is between 0.0 and 5.0
             let validatedRating: Double?

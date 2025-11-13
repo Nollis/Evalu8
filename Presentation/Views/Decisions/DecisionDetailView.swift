@@ -188,7 +188,10 @@ struct OptionRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             // Image or icon
-            if let imageURL = option.imageURL, let url = URL(string: imageURL) {
+            if let imageURLString = option.imageURL,
+               !imageURLString.isEmpty,
+               imageURLString != "null",
+               let url = URL(string: imageURLString) {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .empty:
@@ -199,17 +202,21 @@ struct OptionRow: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                     case .failure:
-                        Image(systemName: "circle.fill")
-                            .font(.system(size: 8))
-                            .foregroundStyle(Color.primaryGradientStart)
+                        Image(systemName: "photo")
+                            .foregroundColor(.gray)
+                            .font(.system(size: 20))
                     @unknown default:
-                        Image(systemName: "circle.fill")
-                            .font(.system(size: 8))
-                            .foregroundStyle(Color.primaryGradientStart)
+                        Image(systemName: "photo")
+                            .foregroundColor(.gray)
+                            .font(.system(size: 20))
                     }
                 }
                 .frame(width: 50, height: 50)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                )
             } else {
                 Image(systemName: "circle.fill")
                     .font(.system(size: 8))

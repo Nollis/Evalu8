@@ -264,7 +264,10 @@ struct QuickDecisionView: View {
     private func optionPreviewCard(option: QuickDecisionSetup.OptionSetup) -> some View {
         HStack(alignment: .top, spacing: 12) {
             // Image
-            if let imageURL = option.imageURL, let url = URL(string: imageURL) {
+            if let imageURLString = option.imageURL,
+               !imageURLString.isEmpty,
+               imageURLString != "null",
+               let url = URL(string: imageURLString) {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .empty:
@@ -275,14 +278,24 @@ struct QuickDecisionView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                     case .failure:
-                        Image(systemName: "photo")
-                            .foregroundColor(.gray)
+                        VStack {
+                            Image(systemName: "photo")
+                                .foregroundColor(.gray)
+                            Text("Failed")
+                                .font(.caption2)
+                                .foregroundColor(.red)
+                        }
+                        .frame(width: 60, height: 60)
                     @unknown default:
                         EmptyView()
                     }
                 }
                 .frame(width: 60, height: 60)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                )
             } else {
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color(.systemGray5))
