@@ -278,7 +278,6 @@ struct QuickDecisionView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                     case .failure(let error):
-                        Logger.shared.log("Failed to load image from \(imageURLString): \(error.localizedDescription)", level: .error)
                         VStack {
                             Image(systemName: "photo")
                                 .foregroundColor(.gray)
@@ -287,6 +286,9 @@ struct QuickDecisionView: View {
                                 .foregroundColor(.red)
                         }
                         .frame(width: 60, height: 60)
+                        .onAppear {
+                            Logger.shared.log("Failed to load image from \(imageURLString): \(error.localizedDescription)", level: .error)
+                        }
                     @unknown default:
                         EmptyView()
                     }
