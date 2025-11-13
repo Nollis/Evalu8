@@ -65,6 +65,8 @@ For production apps, consider:
 4. Create a new secret key
 5. Copy the key (you won't be able to see it again)
 
+**Important:** OpenAI API keys start with `sk-` or `sk-proj-`. If your key starts with something else (like `ghp_` for GitHub tokens), it won't work!
+
 ## Cost Considerations
 
 The app uses `gpt-4o-mini` model which is cost-effective:

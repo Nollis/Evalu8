@@ -32,10 +32,12 @@ struct DecisionChartsView: View {
                         
                         Chart(chartData) { dataPoint in
                             // Ensure score is valid before rendering
-                            if dataPoint.score.isFinite {
+                            if dataPoint.score.isFinite,
+                               !dataPoint.score.isNaN,
+                               dataPoint.score >= 0 {
                                 BarMark(
                                     x: .value("Option", dataPoint.optionName),
-                                    y: .value("Score", max(0, dataPoint.score)) // Ensure non-negative
+                                    y: .value("Score", dataPoint.score)
                                 )
                                 .foregroundStyle(.blue.gradient)
                             }
@@ -69,10 +71,13 @@ struct DecisionChartsView: View {
                                 ForEach(criteria, id: \.objectID) { criterion in
                                     ForEach(options, id: \.objectID) { option in
                                         if let score = getScore(for: option, criterion: criterion),
-                                           score.isFinite {
+                                           score.isFinite,
+                                           !score.isNaN,
+                                           score >= 0,
+                                           score <= 1 {
                                             BarMark(
                                                 x: .value("Criterion", criterion.name ?? "Unknown"),
-                                                y: .value("Score", max(0, min(1, score))), // Clamp between 0-1 for normalized
+                                                y: .value("Score", score), // Already clamped in getScore
                                                 stacking: .normalized
                                             )
                                             .foregroundStyle(by: .value("Option", option.name ?? "Unknown"))
@@ -180,8 +185,11 @@ struct DecisionChartsView: View {
                     criterionWeight: criterion.weight,
                     maxWeight: maxWeight
                 )
-                // Only return valid scores (not NaN or Infinity)
-                guard score.isFinite else {
+                // Only return valid scores (not NaN, Infinity, or out of range)
+                guard score.isFinite,
+                      !score.isNaN,
+                      score >= 0,
+                      score <= 1 else {
                     return nil
                 }
                 return score

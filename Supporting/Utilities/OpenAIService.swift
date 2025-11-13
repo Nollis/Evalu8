@@ -13,6 +13,10 @@ class OpenAIService {
         
         // Try environment variable first
         if let envKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"], !envKey.isEmpty {
+            // Validate API key format (OpenAI keys start with "sk-")
+            if !envKey.hasPrefix("sk-") && !envKey.hasPrefix("sk-proj-") {
+                Logger.shared.log("Warning: API key doesn't appear to be an OpenAI key (should start with 'sk-' or 'sk-proj-'). Current key starts with: \(String(envKey.prefix(4)))...", level: .warning)
+            }
             self.apiKey = envKey
             Logger.shared.log("OpenAI API Key loaded from environment variable", level: .info)
             return
@@ -22,6 +26,10 @@ class OpenAIService {
         if let plistKey = Bundle.main.object(forInfoDictionaryKey: "OpenAIAPIKey") as? String,
            !plistKey.isEmpty,
            plistKey != "YOUR_OPENAI_API_KEY_HERE" {
+            // Validate API key format (OpenAI keys start with "sk-")
+            if !plistKey.hasPrefix("sk-") && !plistKey.hasPrefix("sk-proj-") {
+                Logger.shared.log("Warning: API key doesn't appear to be an OpenAI key (should start with 'sk-' or 'sk-proj-'). Current key starts with: \(String(plistKey.prefix(4)))...", level: .warning)
+            }
             self.apiKey = plistKey
             Logger.shared.log("OpenAI API Key loaded from Info.plist", level: .info)
             return
